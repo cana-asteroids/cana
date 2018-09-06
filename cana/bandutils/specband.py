@@ -6,7 +6,7 @@ from cana import  kwargupdate, find_nearest, Parameter
 from  cana.spec import loadspec, Spectrum
 from cana.errormodels import SpecError
 
-def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03,
+def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03, resolution='auto',
           errormethod='rms', error_param=None, montecarlo=1000,
           min_depth=1., theoric_min=0.7, max_dist=0.05, n_sigma=3):
     r''' Calculates the depth of an absorptium band.
@@ -24,6 +24,11 @@ def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03,
     
     cont_window: float
         The wavelength window size for measuring the continuum
+    
+    resolution: 'auto' or int
+        The spectrum wavelength resolution for measuring the center and depth of
+        the band. If 'auto' will take the spec input resolution. If using the 
+        'rebin' error method,   
     
     errormethod: 'rms', 'removal' or 'bin'
         The error methodology that will be applied for estimating the 
@@ -65,15 +70,15 @@ def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03,
     cont = Continuum(lowerwindow=cont_window, upperwindow=cont_window)
     band = Depth(wmin, wmax, continuum=cont)
     if isinstance(spec, Spectrum):
-        depth = band.measure(spec, error=error)
+        depth = band.measure(spec, resolution=resolution, error=error)
     elif isinstance(spec, basestring):
         spec = loadspec(spec)
-        depth = band.measure(spec, error=error)
+        depth = band.measure(spec, resolution=resolution, error=error)
     elif isinstance(spec, list):
         aux = []
         for spfile in spec:
             sp = loadspec(spfile)
-            dth = band.measure(sp, error=error)
+            dth = band.measure(sp, resolution=resolution, error=error)
             if not dth.is_band():
                 dth.DataFrame[dth.label] = ['-', '-', '-', '-']
             aux.append(dth.DataFrame.T)
@@ -234,7 +239,7 @@ class Depth(object):
         # Trimming spec to the band region
         bspec = spec.trim(self.wmin, self.wmax)
         # measuring the band using the error model
-        band_aux = error.distribution(bspec, self._measure_band)
+        band_aux = error.distribution(bspec, self._measure_band,  resolution=resolution)
         # taking the mean and the std for both values
         minpos = (np.mean(band_aux[:, 0]), np.std(band_aux[:, 0]))
         depth = (np.mean(band_aux[:, 1]), np.std(band_aux[:, 1]))
@@ -252,10 +257,12 @@ class Depth(object):
         fspec, fcoefs = spec.fit(order=4, ftype='spline')
         if isinstance(resolution, int):
             x = np.linspace(spec.w.min(), spec.w.max(), resolution)
-            ref = np.polyval(fcoefs, x)
+            print len(x)
+            ref = fcoefs(x)
             fspec = Spectrum(x, ref)
         # removing continuum
         fspec_wo_cont = self.cont.remove(fspec)
+        len(fspec_wo_cont.w)
         # finding the minimum
         band_min_index = fspec_wo_cont.r.argmin()
         # characterizing the band

@@ -47,6 +47,22 @@ class SpecError(object):
 
 
     def binmethod(self, spec, binsize):
+        r'''
+        Rebin the Spectrum and takes the bin deviation as the error
+        for resampling the reflectance values. 
+
+        Parameters
+        ----------
+        spec: spectrum
+            The spectrum object
+        
+        bisize: int
+            The size of the bin
+        
+        Returns
+        --------
+        The resampled binned Spectrum
+        '''
         rspec = spec.rebin(binsize=binsize, std=True, rem_trend=True)
         spec_resamp = self.resample_vec(rspec.r, rspec.r_unc)
         return Spectrum(rspec.w, spec_resamp, r_unc=rspec.r_unc, unit=rspec.unit)
@@ -54,6 +70,20 @@ class SpecError(object):
     
     def removalmethod(self, spec, rem_per):
         r'''
+        Resample the spectrum by randomly removing a percentage of
+        the points.
+
+        Parameters
+        ----------
+        spec: spectrum
+            The spectrum object
+
+        rem_per: float
+            The percentage of points to remove (from 0 to 1).
+
+        Returns
+        --------
+        The resampled Spectrum with points removed                    
         '''
         rem_size = int(spec.res * rem_per)
         rid = np.random.random_integers(0, spec.res, size=rem_size)
@@ -63,6 +93,17 @@ class SpecError(object):
 
     def rmsmethod(self, spec):
         r'''
+        Estimates the rms of the spectrum and resample the reflectances
+        considering the rms as the errors in the reflectances values
+
+        Parameters
+        ----------
+        spec: spectrum
+            The spectrum object
+
+        Returns
+        --------
+        The resampled Spectrum   
         '''
         rms = spec.estimate_rms()
         resampled_spec = self._rms_resample(spec, rms)
@@ -81,6 +122,16 @@ class SpecError(object):
 
     def resample(self, spec):
         r'''
+        Resamples the spectrum with class attributed method
+
+        Parameters
+        ----------
+        spec: spectrum
+            The spectrum object
+
+        Returns
+        --------
+        The resampled Spectrum   
         '''
         if self.method == 'rms':
             return self.rmsmethod(spec)
@@ -90,10 +141,30 @@ class SpecError(object):
             return self.binmethod(spec, self.param)
 
 
-    def distribution(self, spec, func):
+    def distribution(self, spec, func, **kwargs):
+        r'''
+        Applies the Monte-Carlo model using a funtion
+        on a spectrum to generate a distribution of
+        parameters
+
+        Parameters
+        ----------
+        spec: spectrum
+            The spectrum object        
+        
+        func: function
+            The python function that will take the 
+            spectrum as input
+        
+        **kwargs (optional): The funtion kwargs
+
+        Return
+        ------
+        A numpy array with the outputs of the function
+        '''
         out = []
         for _ in xrange(self.n):
             sp = self.resample(spec)
-            out_aux = func(sp)
+            out_aux = func(sp, **kwargs)
             out.append(out_aux)
         return np.array(out)
