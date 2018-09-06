@@ -53,6 +53,12 @@ def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03,
     n_sigma: integer (optional)
         The minimum sigma level for the absorptium band detection.
         Default is 3.
+    
+    Returns
+    --------
+    DepthValue or Pandas.DataFrame
+        For a single spectrum it will return a Depthvalue, for a list
+        of spectra, returns a pandas.DataFrame with the results 
 
     '''
     error = SpecError(n=montecarlo, method=errormethod, param=error_param)
@@ -67,10 +73,10 @@ def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03,
         aux = []
         for spfile in spec:
             sp = loadspec(spfile)
-            dth = band.measure(spec, error=error)
+            dth = band.measure(sp, error=error)
             if not dth.is_band():
-                dth.Dataframe[dth.label] = ['-', '-', '-', '-']
-            aux.append(dth.Dataframe.T)
+                dth.DataFrame[dth.label] = ['-', '-', '-', '-']
+            aux.append(dth.DataFrame.T)
         depth = pd.concat(aux)
     return depth
     
@@ -266,11 +272,11 @@ class DepthValue(Depth, Parameter):
         self.spec = spec
         self.center = center
         self.depth = depth
-        self.Dataframe = self._build_dataframe()
+        self.DataFrame = self._build_dataframe()
         self.label = label
         if label == None:
             self.label = spec.label
-        self.Dataframe[self.label] = [depth[0], depth[1], center[0], center[1]]
+        self.DataFrame[self.label] = [depth[0], depth[1], center[0], center[1]]
         self.cont = cont
 
     @staticmethod

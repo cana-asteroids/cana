@@ -65,3 +65,6 @@ class Parameter(object):
 
     def __repr__(self):
         return self.DataFrame.__repr__()
+    
+    def to_csv(self, fname, sep=' '):
+        self.DataFrame.to_csv(fname, sep=sep)
