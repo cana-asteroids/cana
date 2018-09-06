@@ -7,13 +7,13 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from cana import find_nearest, auxplotstyle
+from cana import find_nearest, kwargupdate
 # Omiting the warning for bad polynomial fitting
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 
-def loadspec(fname, r_error_col=None, unit='micron',
+def loadspec(fname, unit='micron', r_error_col=None,
              masknull=True, label=None, **kwargs):
     r'''
     Loads a spectrum file and to an Spectrum object
@@ -22,20 +22,28 @@ def loadspec(fname, r_error_col=None, unit='micron',
     ----------
     fname: str
         Path for the spectrum file
-
+    
     unit: str
         The wavelength unit. Possible values are: 'micron', 'angstron',
         'nanometer'. Default is 'micron'.
 
-    masknull: boolean
+    r_error_col: None or integer (optional)
+        The collumn for the errors in the reflectance.
+        Default is None
+
+    masknull: boolean (optional)
         If True removes points where the wavelength is zero. Default
         is True 
+
+    label: None or string (optional)
+        The spectrum label. If None it will take the file basename.
+        Default is None.
 
     **kwargs: Other arguments for numpy.loadtxt
 
     Returns
     -------
-    Spectrum Object
+    A Spectrum 
     '''
     # setting default values for loading the spectrum file
     default_kwargs = {'unpack': True}
@@ -49,9 +57,9 @@ def loadspec(fname, r_error_col=None, unit='micron',
         mask = np.argwhere(spec_data[0] == 0)
         spec_data = np.delete(spec_data, mask, axis=1)
     # inserting it in as a Spectrum object
-    if r_error_col:
+    if r_error_col is not None:
         r_error_col = spec_data[r_error_col]
-
+    # setting the label 
     if label == None:
         label = basename(splitext(fname)[0])
     spec = Spectrum(w=spec_data[0], r=spec_data[1],
@@ -60,38 +68,51 @@ def loadspec(fname, r_error_col=None, unit='micron',
     return spec
 
 class Spectrum(np.recarray):
-    r'''Class to handle asteroid spectra
+    r'''Create a spectrum object.
 
-    :Args:
-        wave: numpy array
-            array corresponding to the wavelength
+        A spectrum array is a subclass of a record or structured numpy array,
+        with one axis representing the wavelength vector (w) and other the 
+        reflectance (r). The optional        
 
-        ref: numpy array
+    Parameters
+    ----------
+        w: numpy array
+            array corresponding to the wavelength vector
+
+        r: numpy array
             array corresponding to the relative reflectance of
-            asteroid
+            the asteroid
 
-        unit: str
-            The wavelength units. Default is 'microns'
+        unit: str 
+            The wavelength units. Default is 'microns'.
 
-    Atributes:
-        unit: str
-            The wavelength units. Default is 'microns'
+        r_unc: numpy array (optinal)
+            array corresponding to the relative reflectance
+            uncertainty of the asteroid
+    
+        path: None or str (optional)
+            The path of the spectrum file
+        
+        label: None or str
+            The spectrum label
 
-        wavemin: float
-            The lowest value of the spectrum wavelength coverage
-
-        wavemin: float
-            The lowest value of the spectrum wavelength coverage
-
+    Atributes
+    ----------
         res: float
             The spectrum resolution (number of points).
 
-        fspec: numpy array
-            2D array of the fitted spectra. Set as None when the
-            class is iniciated.
-
+    Extended Methods
+    ----------------
+    trim
+    fit
+    autofit
+    clean_spec
+    estimate_rms
+    rebin
+    save
+    plot
     '''
-    def __new__(cls, w, r, r_unc=None, unit='microns', path=None, label=None):                  
+    def __new__(cls, w, r, unit='microns', r_unc=None, path=None, label=None):                  
         assert len(w) == len(r)
         dt_list = [('w', 'float'), ('r', 'float')]
         arr_list = [w, r] 
@@ -101,10 +122,7 @@ class Spectrum(np.recarray):
             arr_list.append(r_unc)
         dt = np.dtype(dt_list)
         buffer = np.array(zip(*arr_list),dtype=dt)
-        # buffer = np.array(np.r_[w, r], dtype=[('w', 'float'), ('r', 'float')]) 
         obj = super(Spectrum, cls).__new__(cls, buffer.shape, dtype=dt)
-                                                # buffer=buffer)
-
         obj.w =  buffer['w']
         obj.r =  buffer['r']
         if r_unc is not None:
@@ -285,6 +303,9 @@ class Spectrum(np.recarray):
 
         sigma: int
             Remove points higher than sigma.
+        
+        fit: 'auto' or integer
+            The order of the polynomial fit. If auto it will try to find automaticaly
 
         Returns
         -------
@@ -385,24 +406,33 @@ class Spectrum(np.recarray):
         return Spectrum(wave_reb, ref_reb, r_unc=std, unit=self.unit,
                          path=self.path, label=self.label)
 
-    def normalize(self, w_norm=0.55, window=None, interpolate=False):
+    def normalize(self, wnorm=0.55, window=None, interpolate=False):
         r''' Normalize the spectrum in a particular wavelength.
 
         Parameters
         ----------
-        w_norm: float
+        wnorm: float
             Wavelength value to normalize the spectrum.
             If interpolate=False, The code will search the closest
             value.
         
-        window: None or float
-            The size of the window to 
+        window: None or float (optional)
+            The wavelenght window size for normalizing.
+            If None it will normalize in the wnorm point only.
+
+        interpolate: boolean (optional) -> not implemented
+            If interpolate=False, The code will search the closest
+            value. If True it will interpolate the value of wnorm.
+        
+        Returns
+        -------
+        The normalized Spectrum
         '''
         if window == None:
-            aux = find_nearest(self.w, w_norm)[0]
+            aux = find_nearest(self.w, wnorm)[0]
             self.r = self.r / self.r[aux]
         else:
-            aux = np.argwhere((self.w>w_norm-window) & (self.w<w_norm+window))
+            aux = np.argwhere((self.w>wnorm-window) & (self.w<wnorm+window))
             self.r = self.r / np.mean(self.r[aux])
         return self
     
@@ -442,7 +472,9 @@ class Spectrum(np.recarray):
     def plot(self, fax=None, show=True, savefig=None,
              axistitles=True, speckwargs=None, legendkwargs=None):
         r'''
-        Method for the spectrum vizualization
+        Method for the spectrum vizualization. This method is implemented for a 
+        quick visualization of the spectrum. For more complexes viazualitions we
+        we recommend 
 
         Parameters
         ----------
@@ -460,13 +492,18 @@ class Spectrum(np.recarray):
         axistitles: boolean
             If True will label the axis. Default is True.
 
-        specsty: dict
+        speckwargs: dict
             Arguments for matplotlib plot function.
             default values: {'c':'0.9', 'lw':'1'}.
 
-        legendsty: dict
+        legendkwargs: dict
             Arguments for matplotlib legend function.
             default values: {'loc':'best'}.
+        
+        Returns
+        ------
+        the matplotlib.axes of the figure
+
         '''
         # checking if plot in another frame
         if fax is None:
@@ -476,8 +513,8 @@ class Spectrum(np.recarray):
         specsty_defaults = {'c':'0.1', 'lw':'1'}
         legendsty_defaults = {'loc':'best'}
         # updating plot styles
-        speckwargs = auxplotstyle(specsty_defaults, speckwargs)
-        legendkwargs = auxplotstyle(legendsty_defaults, legendkwargs)
+        speckwargs = kwargupdate(specsty_defaults, speckwargs)
+        legendkwargs = kwargupdate(legendsty_defaults, legendkwargs)
         # Ploting the spec
         fax.plot(self.w, self.r, **speckwargs)
         # Checking if desired to plot the axis labels
@@ -495,3 +532,6 @@ class Spectrum(np.recarray):
         # show in the matplotlib window?
         if show:
             plt.show()
+        return fax
+
+
