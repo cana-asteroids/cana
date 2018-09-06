@@ -1,0 +1,1 @@
+from specerrors import SpecError

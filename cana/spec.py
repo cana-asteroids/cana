@@ -13,7 +13,7 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 
-def loadspec(fname, unit='micron', r_error_col=None,
+def loadspec(fname, unit='microns', r_error_col=None,
              masknull=True, label=None, **kwargs):
     r'''
     Loads a spectrum file and to an Spectrum object
@@ -114,6 +114,7 @@ class Spectrum(np.recarray):
     '''
     def __new__(cls, w, r, unit='microns', r_unc=None, path=None, label=None):                  
         assert len(w) == len(r)
+        assert unit.lower() in ['microns', 'angstrom'], 'unit should be microns or angstroms'
         dt_list = [('w', 'float'), ('r', 'float')]
         arr_list = [w, r] 
         if (type(r_unc) is np.ndarray) and (r_unc.size==r.size):
@@ -128,7 +129,7 @@ class Spectrum(np.recarray):
         if r_unc is not None:
             obj.r_unc = buffer['r_unc']
         obj = obj.view(Spectrum)
-        obj.unit = unit
+        obj.unit = unit.lower()
         obj.res = len(obj.w)
         obj.path = path
         obj.label = label
