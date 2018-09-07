@@ -2,9 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from cana import  kwargupdate, find_nearest, Parameter
-from  cana.spec import loadspec, Spectrum
-from cana.errormodels import SpecError
+from cana import  kwargupdate, find_nearest, Parameter, loadspec, Spectrum, SpecError
 
 def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03, resolution='auto',
           errormethod='rms', error_param=None, montecarlo=1000,
@@ -27,8 +25,7 @@ def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03, resolution='auto',
     
     resolution: 'auto' or int
         The spectrum wavelength resolution for measuring the center and depth of
-        the band. If 'auto' will take the spec input resolution. If using the 
-        'rebin' error method,   
+        the band. If 'auto' will take the spec input resolution. 
     
     errormethod: 'rms', 'removal' or 'bin'
         The error methodology that will be applied for estimating the 
@@ -220,7 +217,18 @@ class Continuum(object):
 
 class Depth(object):
     r'''
-    Class  absorptium band
+    Calculates the depth and center of a spectrum absorptium band
+
+    Parameters
+    ----------
+    wmin: float
+        The wavelength for the beginning of the band. 
+    
+    wmax: float
+        The wavelength for the beginning of the band
+    
+    continuum: Continuum
+        A continuum object
     '''
     def __init__(self, wmin=0.55, wmax=0.85, continuum=Continuum()):
         #inheriting band model
@@ -235,6 +243,22 @@ class Depth(object):
 
         Parameters
         ----------
+        spec: Spectrum
+            The spectrum object
+
+        error: SpecError
+            The model to estimate the slope uncertainty.
+        
+        label: None or str
+            The spectrum label (for the output)
+        
+        resolution: 'auto' or int
+           The spectrum wavelength resolution for measuring the center and depth of
+           the band. If 'auto' will take the spec input resolution.
+        
+        Returns
+        --------
+            DepthValue
         '''
         # Trimming spec to the band region
         bspec = spec.trim(self.wmin, self.wmax)
@@ -257,12 +281,10 @@ class Depth(object):
         fspec, fcoefs = spec.fit(order=4, ftype='spline')
         if isinstance(resolution, int):
             x = np.linspace(spec.w.min(), spec.w.max(), resolution)
-            print len(x)
             ref = fcoefs(x)
             fspec = Spectrum(x, ref)
         # removing continuum
         fspec_wo_cont = self.cont.remove(fspec)
-        len(fspec_wo_cont.w)
         # finding the minimum
         band_min_index = fspec_wo_cont.r.argmin()
         # characterizing the band
