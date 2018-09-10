@@ -6,7 +6,8 @@ from cana import  kwargupdate, find_nearest, Parameter, loadspec, Spectrum, Spec
 
 def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03, resolution='auto',
           errormethod='rms', error_param=None, montecarlo=1000,
-          min_depth=1., theoric_min=0.7, max_dist=0.05, n_sigma=3):
+          min_depth=1., theoric_min=0.7, max_dist=0.05, n_sigma=3,
+          speckwars=None):
     r''' Calculates the depth of an absorptium band.
 
     Parameters
@@ -65,6 +66,8 @@ def depth(spec, wmin=0.55, wmax=0.85, cont_window=0.03, resolution='auto',
     '''
     error = SpecError(n=montecarlo, method=errormethod, param=error_param)
     cont = Continuum(lowerwindow=cont_window, upperwindow=cont_window)
+    speckwars_default = {'unit':'micron'}
+    speckwars = kwargupdate(speckwars_default, speckwars)
     band = Depth(wmin, wmax, continuum=cont)
     if isinstance(spec, Spectrum):
         depth = band.measure(spec, resolution=resolution, error=error)

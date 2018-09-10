@@ -5,7 +5,7 @@ from cana import  loadspec, kwargupdate, Parameter, SpecError, Spectrum
 
 
 def slope(spec, wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
-          error_param=None, montecarlo=1000):
+          error_param=None, montecarlo=1000, speckwars=None):
     r'''
     Calculates the spectral gradient
 
@@ -44,6 +44,8 @@ def slope(spec, wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
 
     '''
     slopemodel = Slope(wmin, wmax, norm)
+    speckwars_default = {'unit':'micron'}
+    speckwars = kwargupdate(speckwars_default, speckwars)
     error = SpecError(n=montecarlo, method=errormethod, param=error_param)
     if isinstance(spec, Spectrum):
         slp = slopemodel.measure(spec, error=error)

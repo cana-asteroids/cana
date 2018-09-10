@@ -6,9 +6,44 @@ import matplotlib.pyplot as plt
 from matplotlib.cm import get_cmap
 import pandas as pd
 from photoconfig import CONFIG
+from cana import loadspec, kwargupdate
 
 # Absolute directory path for this file
 PWD = os.path.dirname(os.path.abspath(__file__))
+
+def convolution(spec, system='sdss', whichfilters=None, label=None, speckwars=None):
+    r'''
+    Performs the convolution between an Spectrum and a the filter system.
+
+    For an object-oriented aproach check astertools.spectrophotometry.Photometry.
+
+    Parameters
+    ----------
+    spec: Spectrum object
+
+    system: str
+        The photometric system name. Options are: sdss, jplus, osiris
+
+    whichfilters:
+
+    Returns
+    -------
+    '''
+    photo = Photometry(system)
+    speckwars_default = {'unit':'micron'}
+    speckwars = kwargupdate(speckwars_default, speckwars)
+    if not isinstance(spec, list):
+        if isinstance(spec, basestring):
+            pspec = loadspec(spec, **speckwars)
+        pspec = photo.convol(spec, whichfilters, label)
+
+    else:
+        pspec = PhotoDataframe(system=system)
+        for fsp in spec:
+            sp = loadspec(fsp, **speckwars)
+            ps_aux = photo.convol(sp, whichfilters)
+            pspec = pspec.append(pspec)
+    return pspec
 
 class PhotometryBase(object):
     r'''
@@ -354,4 +389,7 @@ class PhotoDataframe(pd.DataFrame, PhotometryBase):
         pass
     
     def color(self):
+        pass
+
+    def tospec(self):
         pass
