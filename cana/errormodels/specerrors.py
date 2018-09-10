@@ -2,8 +2,8 @@ r'''
 '''
 
 import numpy as np
+import numba as nb
 from cana.spec import Spectrum
-
 
 class SpecError(object):
     r'''
@@ -44,7 +44,7 @@ class SpecError(object):
         self.param = param
         # sppeding up some methods
         self.resample_vec = np.vectorize(self._ref_resample_aux)
-
+        # self.distribution = nb.njit(dist)
 
     def binmethod(self, spec, binsize):
         r'''
@@ -140,7 +140,6 @@ class SpecError(object):
         if self.method == 'rebin':
             return self.binmethod(spec, self.param)
 
-
     def distribution(self, spec, func, **kwargs):
         r'''
         Applies the Monte-Carlo model using a funtion
@@ -168,3 +167,34 @@ class SpecError(object):
             out_aux = func(sp, **kwargs)
             out.append(out_aux)
         return np.array(out)
+
+    def dist(self, spec, func, **kwargs):
+        r'''
+        Applies the Monte-Carlo model using a funtion
+        on a spectrum to generate a distribution of
+        parameters
+
+        Parameters
+        ----------
+        spec: spectrum
+            The spectrum object        
+        
+        func: function
+            The python function that will take the 
+            spectrum as input
+        
+        **kwargs (optional): The funtion kwargs
+
+        Return
+        ------
+        A numpy array with the outputs of the function
+        '''
+
+        out = []
+        for _ in xrange(self.n):
+            sp = self.resample(spec)
+            out_aux = func(sp, **kwargs)
+            out.append(out_aux)
+        return np.array(out)
+
+ 
