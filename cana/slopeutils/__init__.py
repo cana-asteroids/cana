@@ -1,1 +1,1 @@
-from specslope import slope, Slope
+from cana.slopeutils.specslope import slope, Slope

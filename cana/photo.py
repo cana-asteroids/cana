@@ -11,7 +11,7 @@ from cana import loadspec, kwargupdate
 # Absolute directory path for this file
 PWD = os.path.dirname(os.path.abspath(__file__))
 
-def convolution(spec, system='sdss', whichfilters=None, label=None, speckwars=None):
+def convolution(spec, system='sdss', whichfilters=None, label=None, speckwargs=None):
     r'''
     Performs the convolution between an Spectrum and a the filter system.
 
@@ -25,19 +25,29 @@ def convolution(spec, system='sdss', whichfilters=None, label=None, speckwars=No
         The photometric system name. Options are: sdss, jplus, osiris
 
     whichfilters:
+        The filters to apply the convolution. None will try the convolution
+        in all filters
+        
+    label: string
+        The label for the output. Used only for a single file
+    
+    speckwargs: dict
+        Options for reading files with loadspec. Default is {'unit':'microns'}.
+        For more options check cana.loadspec documentation.
 
     Returns
     -------
+    PhotoDataframe with colvoluted spectrophotometry
     '''
     photo = Photometry(system)
-    speckwars_default = {'unit':'micron'}
-    speckwars = kwargupdate(speckwars_default, speckwars)
+    speckwars_default = {'unit':'microns'}
+    speckwargs = kwargupdate(speckwars_default, speckwargs)
     if not isinstance(spec, list):
         if isinstance(spec, basestring):
-            pspec = loadspec(spec, **speckwars)
+            spec = loadspec(spec, **speckwargs)
         pspec = photo.convol(spec, whichfilters, label)
 
-    else:
+    elif isinstance(spec, list):
         pspec = PhotoDataframe(system=system)
         for fsp in spec:
             sp = loadspec(fsp, **speckwars)
@@ -135,7 +145,7 @@ class Photometry(PhotometryBase):
         self.transmission_curves = self._load()
 
     def _load(self):
-        fsystems_dir = PWD+'/../datasets/data/photometry/'
+        fsystems_dir = PWD+'/datasets/data/photometry/'
         if self.name == 'sdss':
             photofile = 'sdss/sdss.tab'
             ids = ['w', 'u', 'g', 'r', 'i', 'z']
@@ -199,7 +209,7 @@ class Photometry(PhotometryBase):
 
         Returns
         -------
-        PhotoDataframe
+        PhotoDataframe with colvoluted spectrophotometry
         '''
         ## -> check here the bandpass
         # checking which bands to convolve
@@ -279,6 +289,33 @@ class Photometry(PhotometryBase):
 
 class PhotoDataframe(pd.DataFrame, PhotometryBase):
     r'''
+    A subclass of a pandas.DataFrame to handle spectrophotometric tables
+
+    Parameters
+    ----------
+    data: list or pandas.DataFrame
+    
+    system: None or string
+        The photometric system beeing used. Options are: sdss, jplus, jwst, ecas and osiris
+    
+    missing_columns: list
+    
+    autofill: boolean
+        If True will fill collumns based on the photometric system
+    
+    Extended Attributes
+    -------------------
+    system: PhotometryBase
+        A simplified dataframe with photometric system information
+    
+    Exetended Methods
+    -----------------
+    insert_errors
+    plot
+    flux2mag
+    mag2flux
+    color
+    to_spec  
     '''
 
     @property
