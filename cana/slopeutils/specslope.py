@@ -43,7 +43,7 @@ def slope(spec, wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
         of spectra, returns a pandas.DataFrame with the results 
 
     '''
-    slopemodel = Slope(wmin, wmax, norm)
+    slopemodel = Slope(wmin=wmin, wmax=wmax, norm=norm)
     speckwars_default = {'unit':'microns'}
     speckwargs = kwargupdate(speckwars_default, speckwargs)
     error = SpecError(n=montecarlo, method=errormethod, param=error_param)
@@ -111,10 +111,10 @@ class Slope(object):
             slp_value = self._calc_slope(slspec)
             slp_unc = None
         else:
-            slp_aux = error.distribution(spec, self._calc_slope)
+            slp_aux = error.distribution(slspec, self._calc_slope)
             slp_value = np.mean(slp_aux)
             slp_unc = np.std(slp_aux)
-        slp = SlopeValue(self, spec, slp_value, slp_unc= slp_unc, label=label)
+        slp = SlopeValue(self, slspec, slp_value, slp_unc= slp_unc, label=label)
         return slp
 
 
