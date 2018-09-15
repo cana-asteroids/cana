@@ -187,7 +187,7 @@ class Taxonomy(object):
         # Checks if desired to to fit the spectra in order to resample the asteroid
         # spectrum in the comparable wavelengths
         if fitspec:
-            fspec, fcoef = spec.autofit()
+            _, fcoef = spec.autofit()
             spec_reflectances = np.polyval(fcoef, tax_comparable['wavelength'])
         spec_reflectances = spec_reflectances/ spec_reflectances[norm_id]
         # If fispec is set to False, then will interpolate the values directly from
@@ -252,7 +252,9 @@ class TaxClass(Taxonomy, Parameter):
         Checks if the closest class can be undertand as an Primitive class
         '''
         if self.system == 'demeo':
-            if self.tax['tax'][0] in ('C', 'Ch', 'Cg', 'Cgh', 'B', 'X', 'D', 'Xe', 'Cb'):
+            if self.tax['tax'][0] in ('B','C', 'Cb', 'Ch', 'Cg', 'Cgh',
+                                      'X', 'Xc', 'Xe', 'Xk',
+                                      'D'):
                 return True
             else:
                 return False
