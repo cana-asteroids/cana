@@ -351,11 +351,13 @@ class DepthValue(Depth, Parameter):
         rms = self.spec.estimate_rms()
         # Restablishing the band depth unit to compare with snr
         band_depth_per = [val/100 for val in self.depth]
+        print band_depth_per[0], sigma*rms
         band_snr = band_depth_per[0] > sigma*rms
         # checking if band depth higher than a limit
         depth = (self.depth[0] > min_depth)
         # now checking the combined result
         ans_aux = [dist, band_snr, depth]
+        print ans_aux
         ans = all(ans_aux)
         return ans
 
