@@ -24,7 +24,8 @@ PACKAGES = ['cana',
             'cana.slopeutils',
             'cana.taxutils',
             'cana.datasets',
-            'cana.errormodels']
+            'cana.errormodels',
+            'cana.pipelines']
 
 PACKAGE_DATA = {
     'cana.datasets': ['data/taxonomy/*',

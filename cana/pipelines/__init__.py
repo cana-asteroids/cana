@@ -1,1 +1,1 @@
-from cana.pipelines.specpipes import primitive
+from specpipes import primitive
