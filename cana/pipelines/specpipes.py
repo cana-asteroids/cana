@@ -68,7 +68,7 @@ def _primitive(spec, tax=None, slope=None, band1=None,
         if tax is not None and spectax.is_primitive():
             specband1.plot(fax=ax[1][1], show=False)
 
-        plt.show()
+        plt.savefig('{0}/{1}.png'.format(outplot, spec.label))
 
     out = pd.concat([specslope.DataFrame.T,taxaux, specband],axis=1, join='inner')
     return out

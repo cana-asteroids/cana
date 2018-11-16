@@ -138,7 +138,7 @@ class Taxonomy(object):
         # sorting and outputing
         obj_class = np.array(chi, dtype=[('tax', '|S4'), ('chi', 'f')])
         obj_class = np.sort(obj_class, order=['chi'])
-        tax = TaxClass(obj_class[:return_n], spec, compspec, tax2comp, self.system)
+        tax = TaxClass(obj_class[:return_n], spec, compspec, tax2comp, self.system, self.norm)
         return tax
 
     def chisquared(self, spec1, spec2):
@@ -235,7 +235,7 @@ class TaxClass(Taxonomy, Parameter):
     A taxonomic class representation
 
     '''
-    def __init__(self, obj_class, spec, compspec, tax2comp, system, label=None):
+    def __init__(self, obj_class, spec, compspec, tax2comp, system, norm, label=None):
         super(TaxClass, self).__init__(system)
 
         self.tax = obj_class
@@ -245,6 +245,7 @@ class TaxClass(Taxonomy, Parameter):
         if label == None:
             self.label = spec.label
         self.DataFrame = pd.DataFrame(obj_class, columns=['tax', 'chi'])
+        self.norm = norm
 
 
     def is_primitive(self):
@@ -307,7 +308,7 @@ class TaxClass(Taxonomy, Parameter):
             fax = fig.gca()
         # Ploting the spec
         if self.norm is None:
-            self.norm = self.dataset['wavelegth'][0]
+            self.norm = find_nearest(self.dataset['wavelegth'], 0.55)[1]
         self.spec = self.spec.normalize(self.norm, window=0.05)
         self.spec.plot(fax=fax, axistitles=axistitles, show=False, speckwargs=speckwargs)
         fax.scatter(self.tax2comp['wavelength'], self.compspec, **dotskwargs)

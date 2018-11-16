@@ -23,9 +23,7 @@ class PhotoError(object):
         filters_err = [fil+'_err' for fil in  filters]
         ref_aux = ref.copy()
         for _ in xrange(self.n):
-            # print ref
             ref_aux[filters] = self.resample_vec(ref[filters], ref[filters_err])
-            # print ref
             out_aux = func(ref_aux, wave, filters, **funckwargs)
             out.append(out_aux)
         return np.array(out)

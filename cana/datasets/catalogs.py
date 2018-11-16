@@ -3,6 +3,7 @@ import os
 from astropy.io import ascii
 import numpy as np
 from cana.photo import PhotoDataframe
+import pandas as pd
 
 # Absolute directory path for this file
 PWD = os.path.dirname(os.path.abspath(__file__))
@@ -92,3 +93,14 @@ def read_astdys(fname='http://hamilton.dm.unipi.it/~astdys2/propsynth/all.syn'):
                         comment='%')
     milani = milani.to_pandas()
     return milani
+
+def read_wise(fname='https://sbnarchive.psi.edu/pds3/non_mission/EAR_A_COMPIL_5_NEOWISEDIAM_V1_0/data/neowise_mainbelt.tab'):
+    r'''
+    '''
+    wise = pd.read_csv(fname, names=('aid', 'prov_desig', 'mpc_packed', 'H', 'G',
+                               'mean_jd', 'N_W1', 'N_W2', 'N_W3', 'N_W4', 'fitcode',
+                               'diameter', 'diameter_err',  'v_albedo',  'v_albedo_err',
+                               'ir_albedo', 'ir_albedo_err', 'beaming', 'beaming_err',
+                               'stacked_flag', 'reference'),
+)
+    return wise

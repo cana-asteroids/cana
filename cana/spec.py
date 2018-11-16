@@ -147,7 +147,7 @@ class Spectrum(np.recarray):
     
     def angstron2micron(self):
         self.w = self.w/10000.
-        self.unit = 'micron'
+        self.unit = 'microns'
         return self
 
 

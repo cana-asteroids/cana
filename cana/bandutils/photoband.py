@@ -29,7 +29,7 @@ def measureband(func, out, photodata, method='joint', filters='r i z', method_cl
         ## applying methodology
         if method == 'threshold':
             # Calculating the depth distribution
-            depth_arr = error.distribution(error.n, photodata.system.center, ast, filters, func)
+            depth_arr = error.distribution(photodata.system.center, ast, filters, func)
             # if threshold not parsed, calculating threshold
             if not isinstance(method_class, float):
                 err = [ast[col] for col in ast.index if '_err' in col]
@@ -71,6 +71,7 @@ def _threepointsband(ref, wave, filters):
     '''
     # the filters for fitting the continuum are the first and last filters
     contfilters = [filters[0], filters[-1]]
+    # print contfilters, wave[filters[1]],filters[1]
     contcoef = np.polyfit(wave[contfilters], ref[contfilters], 1)
     contref = np.polyval(contcoef, wave[filters[1]])
     # print ref[filters[1]],  contref
@@ -145,7 +146,7 @@ def _fitband(ref, wave, filters):
 
 def calculate_threshold(photodata, system, filters,func,
                        flat_ref=1,
-                       band_ref='/home/mario/projetos/astertools/test/testdata/spectra/38.tab',
+                       band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
                        errormodel=PhotoError()):
     r'''
     '''
@@ -161,7 +162,7 @@ def calculate_threshold(photodata, system, filters,func,
 class BandProbability(object):
 
     def __init__(self, system, flat_ref=1,
-                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/38.tab',
+                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
                  errormodel=PhotoError()):
         r'''
         '''
@@ -173,7 +174,6 @@ class BandProbability(object):
                                    system = system,
                                    index=['flat'])
         self.data = self.data.append(self.make_band_ref(band_ref))
-
         self.errormodel = errormodel
 
 
@@ -184,12 +184,11 @@ class BandProbability(object):
         if isinstance(filters, basestring):
             filters = filters.split()
         
-        self.data = self.data.insert_error(err, filters)
-
-        flat_dist = self.errormodel.distribution(self.errormodel.n, self.system['center'],
+        self.data.insert_error(err, filters)
+        flat_dist = self.errormodel.distribution(self.system['center'],
                                                  self.data.loc['flat'],
                                                  filters, func)
-        band_dist = self.errormodel.distribution(self.errormodel.n, self.system['center'],
+        band_dist = self.errormodel.distribution(self.system['center'],
                                                   self.data.loc['band'],
                                                   filters, func)
         return band_dist, flat_dist
@@ -211,7 +210,7 @@ class BandProbability(object):
 class BandThreshold(BandProbability):
 
     def __init__(self, system, flat_ref=1,
-                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/38.tab',
+                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
                  errormodel=PhotoError()):
         r'''
         '''
@@ -231,7 +230,7 @@ class BandThreshold(BandProbability):
 class JointProbability(BandProbability):
 
     def __init__(self, system, flat_ref=1,
-                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/38.tab',
+                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
                  errormodel=PhotoError()):
         r'''
         '''
@@ -258,7 +257,20 @@ class JointProbability(BandProbability):
     def measure(self, depth, ast, func, filters):
         r'''
         '''
-        err = [ast[col] for col in ast.index if '_err' in col]
+        # err_fil = [i+'_err' for i in filters]
+        err = [ast[i+'_err'] for i in filters]
         self.band, self.flat = self.gen_distributions(err, func, filters)
+
+        # plt.figure()
+        # plt.hist(self.flat, color='r',alpha=0.5, bins=40, density=True)
+        # plt.axvline(depth)
+        # plt.hist(self.band, color='b',alpha=0.5, bins=40, density=True)
+        # plt.xlim(-0.06, 0.04)
+        # plt.show()
+
+        # print self.band.mean(), self.band.std()
+        # print self.flat.mean(), self.flat.std()
+        # print
+
         prob = self.integrate(depth)
         return prob
