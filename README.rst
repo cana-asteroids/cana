@@ -1,4 +1,5 @@
-# CANA: Codes for Analysis of Asteroids
+CANA: Codes for Analysis of Asteroids
+=======================================
 
 Introduction
 --------------
