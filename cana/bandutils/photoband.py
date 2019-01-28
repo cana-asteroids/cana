@@ -146,7 +146,7 @@ def _fitband(ref, wave, filters):
 
 def calculate_threshold(photodata, system, filters,func,
                        flat_ref=1,
-                       band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
+                       band_ref='/home/mario/projetos/canateste/spectra/smassii/91.tab',
                        errormodel=PhotoError()):
     r'''
     '''
@@ -162,7 +162,7 @@ def calculate_threshold(photodata, system, filters,func,
 class BandProbability(object):
 
     def __init__(self, system, flat_ref=1,
-                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
+                 band_ref='/home/mario/projetos/canateste/spectra/smassii/91.tab',
                  errormodel=PhotoError()):
         r'''
         '''
@@ -210,7 +210,7 @@ class BandProbability(object):
 class BandThreshold(BandProbability):
 
     def __init__(self, system, flat_ref=1,
-                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
+                 band_ref='/home/mario/projetos/canateste/spectra/smassii/91.tab',
                  errormodel=PhotoError()):
         r'''
         '''
@@ -230,7 +230,7 @@ class BandThreshold(BandProbability):
 class JointProbability(BandProbability):
 
     def __init__(self, system, flat_ref=1,
-                 band_ref='/home/mario/projetos/astertools/test/testdata/spectra/91.tab',
+                 band_ref='/home/mario/projetos/canateste/spectra/smassii/91.tab',
                  errormodel=PhotoError()):
         r'''
         '''

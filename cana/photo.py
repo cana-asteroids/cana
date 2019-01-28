@@ -63,7 +63,7 @@ def plot_convolution(spec, photo, fax=None, savefig=None, axistitles=True,
     specsty_defaults = {'c':'0.3', 'lw':'1', 'zorder':0}
     specsty = kwargupdate(specsty_defaults, speckwargs)
     # setting default values for image plot with matplotlib
-    dotsty_defaults = {'color':'0.3', 's':70, 'zorder':1}
+    dotsty_defaults = {'color':'steelblue', 's':70, 'zorder':10}
     dotkwargs = kwargupdate(dotsty_defaults, dotkwargs)
     # checking if plot in another frame
     if fax is None:
@@ -115,6 +115,7 @@ class PhotometryBase(object):
         self.name = system
         self.system = self._build_info()
         self.center = self.system['center']
+        self.fwhm = self.system['fwhm']
         self.ids = self.system.index.tolist()
         self.ids_err = [iid+'_err' for iid in self.ids]
 
@@ -146,6 +147,9 @@ class Photometry(PhotometryBase):
     ----------
     system: str
         The Photometric system identifier: 'sdss', 'jplus', 'jwst.
+    
+    tcurve: boolean
+        True if there is
 
     Attributes
     ----------
@@ -168,10 +172,15 @@ class Photometry(PhotometryBase):
     ids_err: list
         A list for the filters errors
     '''
-    def __init__(self, system='sdss'):
+    def __init__(self, system='sdss', tcurve=True):
         self.name = system.lower()
         super(Photometry, self).__init__(system=system)
-        self.transmission_curves = self._load()
+        if system == 'dawn':
+            tcurve = False
+        self.convol_type = tcurve
+        if self.convol_type:
+            self.transmission_curves = self._load()
+
 
     def _load(self):
         fsystems_dir = PWD+'/datasets/data/photometry/'
@@ -221,7 +230,7 @@ class Photometry(PhotometryBase):
         bpass = self._fields_view(self.transmission_curves, ['w', fid])[aux]
         return bpass
 
-    def convol(self, spec, filters=None, label=None):
+    def convol(self, spec, filters=None, label=None, interp=False):
         r'''Apply a convolution of a spectrum with the photometric system
 
         Parameters
@@ -247,7 +256,10 @@ class Photometry(PhotometryBase):
         else:
             cfilters = self.ids
         # making the collumns for the errors
-        convoluted = [self._convol_aux(spec, fil) for fil in cfilters]
+        if self.convol_type:
+            convoluted = [self._transmission_convol_aux(spec, fil, interp) for fil in cfilters]
+        else:
+            convoluted = [self._box_convol_aux(spec, fil, interp) for fil in cfilters]
         if label == None:
             label = spec.label
         # making output
@@ -255,15 +267,41 @@ class Photometry(PhotometryBase):
                                    index=[label])
         return photodata
 
-    def _convol_aux(self, spec, fband):
+    def _transmission_convol_aux(self, spec, fband, interp):
         r'''
         '''
-        # interpolating the the transimission curve
-        band_interp = np.interp(spec.w, self.transmission_curves['w'],
-                                self.transmission_curves[fband])
+        if not interp:
+            # interpolating the the transimission curve
+            ref_f = np.interp(spec.w, self.transmission_curves['w'],
+                                            self.transmission_curves[fband])
+            # performing the convolution
+            cval = np.trapz(ref_f*spec.r*spec.w, spec.w) /     \
+                   np.trapz(ref_f*spec.w, spec.w)
+        else:
+            wave = np.linspace(self.center[fband] - self.fwhm[fband]/2.,
+                            self.center[fband] + self.fwhm[fband]/2.,
+                            interp)
+            ref = np.interp(wave, spec.w, spec.r)
+            ref_f = np.interp(wave, self.transmission_curves['w'],
+                                    self.transmission_curves[fband])
+            # performing the convolution
+            cval = np.trapz(ref_f*ref*wave, wave) /     \
+                   np.trapz(ref_f*wave, wave)
+        return cval
+    
+    def _box_convol_aux(self, spec, fband, interp):
+        r'''
+        '''
+        if not interp:
+            interp = 200 #-> work on how to pass this param
+        wave = np.linspace(self.center[fband] - self.fwhm[fband]/2.,
+                           self.center[fband] + self.fwhm[fband]/2.,
+                           interp)
+        ref = np.interp(wave, spec.w, spec.r)
+        ref_f = np.ones(interp)
         # performing the convolution
-        cval = np.trapz(band_interp*spec.r*spec.w, spec.w) /     \
-               np.trapz(band_interp*spec.w, spec.w)
+        cval = np.trapz(ref_f*ref*wave, wave) /     \
+               np.trapz(ref_f*wave, wave)
         return cval
 
     def _check_bandpass(self):
@@ -305,11 +343,14 @@ class Photometry(PhotometryBase):
             fax = fig.gca()
         # making colors for plot
         cmap = get_cmap(colormap)
-        color_aux = np.linspace(0, 1, len(self.transmission_curves.dtype.names[1:]))
-        for nid, nam in enumerate(self.transmission_curves.dtype.names[1:]):
-            linestyle['c'] = cmap(color_aux[nid])
-            fax.plot(self.transmission_curves['w'], self.transmission_curves[nam],
-                     label=nam, **linestyle)
+        if self.convol_type:
+            color_aux = np.linspace(0, 1, len(self.transmission_curves.dtype.names[1:]))
+            for nid, nam in enumerate(self.transmission_curves.dtype.names[1:]):
+                linestyle['c'] = cmap(color_aux[nid])
+                fax.plot(self.transmission_curves['w'], self.transmission_curves[nam],
+                        label=nam, **linestyle)
+        else:
+            pass #-> make gaussian based on available info
         if legend:
             fax.legend(prop={'size': 8})
         if show:
