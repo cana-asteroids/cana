@@ -86,11 +86,9 @@ class Taxonomy(object):
             The normalization point.
     '''
 
-    def __init__(self, tax='demeo', norm=None):
+    def __init__(self, tax='demeo', norm=0.55):
         self.system = tax.lower()
         self.dataset, self.classes = self._load()
-        if norm is None:
-            norm = self.dataset['wavelength'][1]
         self.norm = norm
 
 
@@ -176,8 +174,8 @@ class Taxonomy(object):
         compared with the taxonomy classes templates
         '''
         # Searching the comparable region between the object and taxonomic classes --> needs improvement
-        comparable_region = np.argwhere((self.dataset['wavelength'] > spec.w.min()) &
-                                        (self.dataset['wavelength'] < spec.w.max()))
+        comparable_region = np.argwhere((self.dataset['wavelength'] >= spec.w.min()-0.01) &
+                                        (self.dataset['wavelength'] <= spec.w.max()+0.01))
         # Trimming the taxonomy dataset to the comparable wavelengths
         tax_comparable = self.dataset[comparable_region]
         norm_id = find_nearest(tax_comparable['wavelength'], self.norm)[0]
@@ -189,7 +187,7 @@ class Taxonomy(object):
         if fitspec:
             _, fcoef = spec.autofit()
             spec_reflectances = np.polyval(fcoef, tax_comparable['wavelength'])
-        spec_reflectances = spec_reflectances/ spec_reflectances[norm_id]
+            spec_reflectances = spec_reflectances/ spec_reflectances[norm_id]
         # If fispec is set to False, then will interpolate the values directly from
         # the spectrum ---> needs implementation
 
@@ -307,8 +305,8 @@ class TaxClass(Taxonomy, Parameter):
             fig = plt.figure()
             fax = fig.gca()
         # Ploting the spec
-        if self.norm is None:
-            self.norm = find_nearest(self.dataset['wavelegth'], 0.55)[1]
+        # if self.norm is None:
+            # self.norm = find_nearest(self.dataset['wavelegth'], 0.55)[1]
         self.spec = self.spec.normalize(self.norm, window=0.05)
         self.spec.plot(fax=fax, axistitles=axistitles, show=False, speckwargs=speckwargs)
         fax.scatter(self.tax2comp['wavelength'], self.compspec, **dotskwargs)

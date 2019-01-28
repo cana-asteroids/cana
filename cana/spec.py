@@ -112,7 +112,7 @@ class Spectrum(np.recarray):
     save
     plot
     '''
-    def __new__(cls, w, r, unit='microns', r_unc=None, path=None, label=None):                  
+    def __new__(cls, w, r, unit='microns', r_unc=None, path=None, label=None):         
         assert len(w) == len(r)
         assert unit.lower() in ['microns', 'angstrom'], 'unit should be microns or angstroms'
         dt_list = [('w', 'float'), ('r', 'float')]
@@ -135,7 +135,6 @@ class Spectrum(np.recarray):
         obj.label = label
         if r_unc is None:
             obj.r_unc = r_unc
-
         return obj
    
     def __array_prepare__(self, out_arr, context=None):
@@ -176,7 +175,10 @@ class Spectrum(np.recarray):
             the trimmed spectrum.
         '''
         aux = self[(self.w > w_min) & (self.w < w_max)]
-        return Spectrum(w=aux['w'], r=aux['r'], r_unc=self.r_unc, unit=self.unit,
+        r_unc = self.r_unc
+        if self.r_unc is not None:
+            r_unc = aux['r_unc']
+        return Spectrum(w=aux['w'], r=aux['r'], r_unc=r_unc, unit=self.unit,
                         path=self.path, label=self.label)
 
     def fit(self, order=4, ftype='spline'):
@@ -209,7 +211,8 @@ class Spectrum(np.recarray):
                          path=self.path, label=self.label)
         return fspec, fcoefs
 
-    def autofit(self, degree_min=1, degree_max=12, test_set_fraction=0.40):
+##############################################################################
+    def autofit2(self, degree_min=1, degree_max=12, test_set_fraction=0.40):
         r'''
         Method for finding the best order of the polynomial fitting of the
         spectrum.
@@ -264,6 +267,39 @@ class Spectrum(np.recarray):
         w_rms_test = rms_test/(len(x_test)-degree-1)
         return w_rms_test #abs(w_rms_test -w_rms_train)
 
+##################################################################################
+# test stuff
+    def autofit(self, degree_min=1, degree_max=12):
+        # f, ax = plt.subplots()
+        rms_arr = []
+        degrees = np.arange(degree_min, degree_max+1)
+
+        for deg in degrees:
+            coefs = np.polyfit(self.w, self.r, deg)
+            poly = np.polyval(coefs, self.w)
+            rms = np.sum(np.square(self.r-poly))
+            # rms_weighted = rms/(len(self.w)-deg-1)
+            # aux = self.estimate_rms(ftype='polynomial', order=deg)
+            # print rms, rms_weighted, aux
+            # ax.scatter(deg, aux, c='g')
+            # ax.scatter(deg, rms, c='b')
+            # ax.scatter(deg, rms_weighted, c='r')
+            rms_arr.append(rms)
+        cont_coef = np.polyfit([degrees.min(), degrees.max()], [rms_arr[0], rms_arr[-1]], 1)
+        cont_line = np.polyval(cont_coef, degrees)
+        rms_aux = np.divide(rms_arr, cont_line)
+        # f2, ax2 = plt.subplots()
+        # ax2.scatter(degrees, rms_aux, c='r')
+
+        if len(np.argwhere(rms_aux >1.01))>=2:
+            bestfit_deg = 1
+        else:
+            rms_min = rms_aux.argmin()
+            bestfit_deg = degrees[rms_min]
+        fspec, fcoefs = self.fit(order=bestfit_deg, ftype='polynomial')
+        return fspec, fcoefs
+
+####################################################################################
 
     def estimate_rms(self, ftype='auto', order=5):
         r'''
@@ -404,7 +440,10 @@ class Spectrum(np.recarray):
         if std:
             std = std_func(ref_arr.reshape(spec_size// binsize, binsize),
                           axis=-1).T
-        return Spectrum(wave_reb, ref_reb, r_unc=std, unit=self.unit,
+            std = np.array(std)
+        else:
+            std=None
+        return Spectrum(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
                          path=self.path, label=self.label)
 
     def normalize(self, wnorm=0.55, window=None, interpolate=False):
@@ -436,6 +475,35 @@ class Spectrum(np.recarray):
             aux = np.argwhere((self.w>wnorm-window) & (self.w<wnorm+window))
             self.r = self.r / np.mean(self.r[aux])
         return self
+    
+    def mask_region(self, wmin, wmax):
+        r'''
+        Exclude a region of the spectrum
+
+        Parameters
+        ----------
+
+        w_min: float
+            Wavelength lower limit of the masked region
+
+        w_max: float
+            Wavelength upper limit of the masked region
+        
+        Returns
+        -------
+        The Spectrum array without the masked region
+
+        '''
+        aux = np.argwhere((self.w>wmin) & (self.w<wmax))
+        mask = np.ones(len(self.w), dtype=bool)
+        mask[aux] = 0
+        w = self.w[mask]
+        r = self.r[mask]
+        r_unc = self.r_unc
+        if r_unc is not None:
+            r_unc = self.r_unc[mask]
+        return Spectrum(w=w, r=r, r_unc=r_unc, unit=self.unit,
+                    path=self.path, label=self.label)
     
     def save(self, fname, fmt='%.5f', delimiter=' ', header='', footer='', 
              comments='#', encoding=None):
@@ -469,6 +537,7 @@ class Spectrum(np.recarray):
         '''
         np.savetxt(fname, self, fmt=fmt, delimiter=delimiter, header=header, footer=footer, 
              comments=comments, encoding=encoding)
+        self.path = fname
 
     def plot(self, fax=None, show=True, savefig=None,
              axistitles=True, speckwargs=None, legendkwargs=None):
@@ -520,8 +589,8 @@ class Spectrum(np.recarray):
         fax.plot(self.w, self.r, **speckwargs)
         # Checking if desired to plot the axis labels
         if axistitles:
-            plt.xlabel('Wavelength (%s)' % self.unit)
-            plt.ylabel('Normalized Reflectance')
+            fax.set_xlabel('Wavelength (%s)' % self.unit)
+            fax.set_ylabel('Normalized Reflectance')
         # plot legend?
         if 'label' in speckwargs:
             fax.legend(**legendkwargs)
@@ -536,3 +605,21 @@ class Spectrum(np.recarray):
         return fax
 
 
+def stack_spec(tup):
+    r'''
+    Stack Spectra arrays.
+
+    Parameters
+    ---------- 
+    tup : sequence of Spectrum
+          The arrays must have the same shape along all but the second axis,
+          except 1-D arrays which can be any length.
+    Returns
+    -------
+    stacked : Spectrum
+        The Spectrum array formed by stacking the given spectra, sorted by the wavelength.
+    '''
+    aux = np.hstack(tup)
+    aux = aux.sort(order='w')
+    return Spectrum(w=aux['w'], r=aux['r'], r_unc=None, unit=tup[0].unit,
+                    path=None, label=tup[0].label)
