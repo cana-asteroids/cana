@@ -3,8 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: https://raw.githubusercontent.com/depra/cana/spec/docs/_static/Cana_logo_small.png
-    :heigth: 600px
+.. image:: https://raw.githubusercontent.com/depra/cana/readme/docs/_static/Cana_logo_small.png
+    :align: center
+    :width: 400px
     :scale: 50
     :alt: Codes for ANalisis of Asteroids
     
