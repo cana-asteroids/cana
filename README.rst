@@ -9,7 +9,6 @@
    :alt: Codes for ANalisis of Asteroids
     
 |docs|
-https://cana.readthedocs.io/en/latest/
 
 What is CANA?
 -------------
@@ -83,7 +82,6 @@ See `cite <cite.html>`_ to get the bibtex entry for the citation.
 
 
 
-.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100%
-    :target: https://cana.readthedocs.io/en/latest/
+.. |docs| image:: https://readthedocs.org/projects/cana/badge/?version=latest
+:target: https://cana.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
