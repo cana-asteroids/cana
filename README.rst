@@ -3,30 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. title:: CANA: Codes for Analysis of Asteroids
+.. image:: https://raw.githubusercontent.com/depra/cana/spec/docs/_static/Cana_logo.png
+    :scale: 50
+    :alt: Codes for ANalisis of Asteroids
+    
 
-.. raw:: html
-
-    <div class="container-fluid banner">
-        <div class="container">
-
-            <div class="row site-title">
-                <div class="col-lg-3 col-sm-2">
-                </div>
-                <div class="col-lg-6 col-sm-8">
-                    <img src="https://raw.githubusercontent.com/depra/cana/spec/docs/_static/Cana_logo.png" width="80%">
-                </div>
-                <div class="col-lg-3 col-sm-2">
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row slogan">
-            <p class="package-name">Codes for ANalysis of Asteroids
-            </p>
-            <p class="slogan">An open-source python tool for asteroid science	
-            </p>
-    </div>
 
 What is CANA?
 -------------
@@ -37,24 +18,6 @@ As part of the PRIMitive Spectroscopic Survey (PRIMASS), we have collected and a
 In this context we collected the routines that we typically use for the analysis and parametrization of these data to make a package.
 As we are preparing to make the data library (PRIMASS-L) public to the comunity through 
 `Small Bodie Node of the the Planetary Data Science (PDS) <https://pds-smallbodies.astro.umd.edu/>`_, it is our aim to make our science reproductible and of easy access. 
-
-Click on the links bellow, if you would like to know more about PRIMASS or PRIMASS-L:
-
-.. raw:: html
-
-
-        <div class="primass">
-
-            <div class="col-md-6 primass-home">
-               <a href=about.html#primitive-asteroid-spectroscopic-survey><img src="https://raw.githubusercontent.com/depra/cana/spec/docs/_static/primass.png" width="60%"></a>
-            </div>
-
-            <div class="col-md-6 primass-home">
-                <a href=about.html#primass-l><img src="https://raw.githubusercontent.com/depra/cana/spec/docs/_static/primass-l.png" width="40%"></a>
-            </div>
-        </div>
-
-
 
 
 Contents
@@ -70,19 +33,42 @@ Spectroscopic analysis tools:
 
 We will soon make available new parametrization methods and tools for handling Photometric data and Compositional modeling!
 
-Get Started
+Dependencies
 ------------
+As Python 2.7 is coming to an end, we have updated all code for Python >=3.6, and do not provide support for Python 2.
 
-See the `install instructions <install.html>`_ to set up your computer and install Cana.
+We recommend using the `Anaconda Python distribution <https://www.anaconda.com/distribution/>`_ to ensure you have all dependencies installed.
 
-Once you have everything installed, we recommend you take a look at our recipes at the
-`Cookbook <cookbook.html>`_, to get an idea of what cana can do. For more detailed 
-documentation go to the `Documentation page <api.html>`_ to get the complete API description. 
+If you have any problems with the instalation, check if all dependencies are installed.
+The dependencies can be seen below:
 
-Cana is still a work in progress, if you are have trouble getting it to work, 
-or you want to give us a feedback or colaborate, you can:
+- `Numpy <http://www.numpy.org/>`__
+- `Pandas <https://pandas.pydata.org/>`_
+- `Scipy <https://www.scipy.org/>`_
+- `Matplotlib <https://matplotlib.org/>`_
+- `Sklearn <http://scikit-learn.org/stable/>`_
 
-* Report bugs, enhancements or else through `Github <https://github.com/depra/cana/issues>`_.
+Installing
+-----------
+
+You can get the latest stable version
+`here <https://github.com/depra/cana/releases>`_, or clone the repository using git:
+
+::
+
+      git clone https://github.com/depra/cana.git
+
+Unpack it if necessary, and go into the directory "*cana-master*", then run the below commands on a terminal shell:
+
+:: 
+
+   python setup.py install
+
+Get Started
+-----------
+
+See the documentation page to get started!
+
 
 Cite
 ----
@@ -91,4 +77,5 @@ CANA is a open tool. You can use, adapt and modify it as wanted. But if you any 
    De Pra, M., Carvano, J., Morate, D., Licandro, J. Pinilla-Alonso, N. (2018). CANA: An open-source python tool to study hydration in the Solar System. 
 
 See `cite <cite.html>`_ to get the bibtex entry for the citation.
+
 
