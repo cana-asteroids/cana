@@ -1,1 +1,0 @@
-from cana.taxutils.spectax import taxonomy, Taxonomy
