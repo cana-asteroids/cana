@@ -8,7 +8,8 @@
    :scale: 50
    :alt: Codes for ANalisis of Asteroids
     
-
+|docs|
+https://cana.readthedocs.io/en/latest/
 
 What is CANA?
 -------------
@@ -81,3 +82,8 @@ CANA is a open tool. You can use, adapt and modify it as wanted. But if you any 
 See `cite <cite.html>`_ to get the bibtex entry for the citation.
 
 
+
+.. |docs| image:: https://readthedocs.org/projects/docs/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://cana.readthedocs.io/en/latest/
