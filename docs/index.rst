@@ -97,7 +97,6 @@ See `cite <cite.html>`_ to get the bibtex entry for the citation.
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Contents:
 
    install.rst
    cite.rst

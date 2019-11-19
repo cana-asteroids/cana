@@ -39,5 +39,4 @@ The dependencies can be seen below:
 - `Matplotlib <https://matplotlib.org/>`_
 - `Sklearn <http://scikit-learn.org/stable/>`_
 
-|
 
