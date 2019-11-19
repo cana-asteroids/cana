@@ -1,0 +1,62 @@
+div.body {
+    min-width: 450px;
+    max-width: 1100px;
+}
+
+p.slogan {
+    font-size: 20pt;
+
+}
+
+p.package-name {
+    font-size: 30pt;
+    font-weight: bold;
+    font-family: 'Bookman';
+}
+
+
+div.slogan {
+    text-align: center;
+    vertical-align: middle;
+}
+
+body {
+    color: #222;
+/*    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
+    font-size: 12pt;
+    /* Margin bottom by footer height with a little room to accomodate small
+     * screens */
+    margin-bottom: 200px;
+}
+
+.home-row > h2 {
+    text-align: center;
+    margin-bottom: 50px;
+    font-size: 30pt;
+}
+
+div.primass-home{
+    vertical-align: middle;
+    display: inline-block;
+    text-align: center;
+}
+
+div.primass-about{
+    vertical-align: middle;
+    display: inline-block;
+    text-align: left;
+}
+
+.footer {
+    color: #6F6F6F;
+    margin-top: 50px;
+    padding-bottom: 30px;
+    font-size: 11pt;
+    /* To stick the footer to the bottom of the page */
+    position: absolute;
+    bottom: 100;
+    /* Set the fixed height of the footer here */
+    min-height: 110px;
+}
+
+
