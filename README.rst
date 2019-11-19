@@ -4,10 +4,9 @@
    contain the root `toctree` directive.
 
 .. image:: https://raw.githubusercontent.com/depra/cana/readme/docs/_static/Cana_logo_small.png
-    :align: center
-    :width: 400px
-    :scale: 50
-    :alt: Codes for ANalisis of Asteroids
+   :align: center
+   :scale: 50
+   :alt: Codes for ANalisis of Asteroids
     
 
 
