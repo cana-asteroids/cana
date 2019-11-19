@@ -83,5 +83,5 @@ See `cite <cite.html>`_ to get the bibtex entry for the citation.
 
 
 .. |docs| image:: https://readthedocs.org/projects/cana/badge/?version=latest
-:target: https://cana.readthedocs.io/en/latest/?badge=latest
-:alt: Documentation Status
+   :target: https://cana.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
