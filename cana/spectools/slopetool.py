@@ -2,6 +2,7 @@ r"""Tool for measuring spectral slope."""
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import pandas as pd
 from .uncertainties import SpecError
 from .. import loadspec, Spectrum
@@ -243,6 +244,7 @@ class SlopeValue(Slope, Parameter):
             plt.savefig(savefig)
             if not show:
                 plt.clf()
+            matplotlib.use('TkAgg')
         # # show in the matplotlib window?
         if show:
             plt.show()

@@ -325,7 +325,7 @@ class Spectrum(np.recarray):
         rms = np.std(std_arr)
         return rms
 
-    def clean_spec(self, method='sigmaclip', sigma=3, fit=1):
+    def clean_spec(self, method='sigmaclip', sigma=3, fit='auto'):
         r"""
         Remove outliers from the spectrum.
 
@@ -543,7 +543,7 @@ class Spectrum(np.recarray):
                    footer=footer, comments=comments, encoding=encoding)
         self.path = fname
 
-    def plot(self, fax=None, show=True, savefig=None,
+    def plot(self, fax=None, show=False, savefig=None,
              axistitles=True, speckwargs=None, legendkwargs=None):
         r"""
         Quick plot of the Spectrum.
@@ -601,7 +601,7 @@ class Spectrum(np.recarray):
             plt.savefig(savefig)
             if not show:
                 plt.clf()
-            matplotlib.use('Agg')
+            matplotlib.use('TkAgg')
         # show in the matplotlib window?
         if show:
             plt.show()

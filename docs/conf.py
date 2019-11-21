@@ -10,11 +10,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
+import os
+import sys
 # sys.path.insert(0, os.path.abspath('.'))
 import sphinx_bootstrap_theme
-
+import sphinx_gallery
+from sphinx_gallery.sorting import FileNameSortKey
 # -- Project information -----------------------------------------------------
 
 project = 'CANA'
@@ -28,7 +29,40 @@ author = 'M. De Pra'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-]
+#    'sphinx.ext.autodoc',
+#    'sphinx.ext.autosummary',
+#    'sphinx.ext.coverage',
+#    'sphinx.ext.mathjax',
+#    'sphinx.ext.doctest',
+#    'sphinx.ext.viewcode',
+#    'sphinx.ext.extlinks',
+#    'matplotlib.sphinxext.plot_directive',
+    'sphinx_gallery.gen_gallery']
+
+plot_formats = [("png", 90)]
+plot_html_show_formats = False
+plot_html_show_source_link = False
+#min_reported_time = 0
+#if 'SOURCE_DATE_EPOCH' in os.environ:
+#    min_reported_time = sys.maxint if sys.version_info[0] == 2 else sys.maxsize
+
+#image_scrapers = ('matplotlib', 'cana')
+
+sphinx_gallery_conf = {
+    'doc_module': ('sphinx_gallery', 'numpy'),
+    'examples_dirs': '../cookbook',
+    'gallery_dirs': 'gallery',
+    'backreferences_dir': False,
+#    'image_scrapers': image_scrapers,
+#    # specify the order of examples to be according to filename
+#    'within_subsection_order': FileNameSortKey,
+#    'min_reported_time': min_reported_time,
+#    'show_memory': True,
+#    # capture raw HTML or, if not present, __repr__ of last expression in
+#    # each code block
+#    'capture_repr': ('_repr_html_', '__repr__'),
+}
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -38,7 +72,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
+# The master toctree document.
 master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
@@ -55,13 +89,10 @@ html_theme_options = {
     'bootswatch_theme': "sandstone",
     'navbar_title': 'CANA',
     'navbar_site_name': "Site",
-    'navbar_links': [
-                     ("About", "about"),
+    'navbar_links': [("About", "about"),
                      ("Install", "install"),
-                     ("Cookbook", "cookbook"),
-                   # ("Tutorials", ""),
+                     ("Cookbook", "gallery/index"),
                      ("Docs", "docs"),
-#                     ("Notebooks", "notebooks"),
                      ("Contribute", "contribute"),
                      ("Cite", "cite")],
     # Render the next and previous page links in navbar. (Default: true)
@@ -102,4 +133,3 @@ html_css_files = [
 ]
 def setup(app):
 	app.add_stylesheet("style.css")
-
