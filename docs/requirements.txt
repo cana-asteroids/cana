@@ -1,2 +1,2 @@
 sphinx-bootstrap-theme
-
+sphinx-gallery
