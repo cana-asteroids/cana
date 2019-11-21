@@ -1,2 +1,7 @@
 sphinx-bootstrap-theme
 sphinx-gallery
+numpy
+scipy
+pandas
+sklearn
+matplotlib
