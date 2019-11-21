@@ -70,7 +70,7 @@ Unpack it if necessary, and go into the directory "*cana-master*", then run the 
 Get Started
 -----------
 
-See the `documentation page <https://readthedocs.org/projects/cana/badge/?version=latest>`_ to get started!
+See the `documentation page <https://cana.readthedocs.io/en/latest/?badge=latest>`_ to get started!
 
 
 Cite
