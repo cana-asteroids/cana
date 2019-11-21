@@ -7,7 +7,8 @@
    :align: center
    :scale: 50
    :alt: Codes for ANalisis of Asteroids
-    
+   :target: https://cana.readthedocs.io/en/latest/?badge=latest
+
 |build| |docs|
 
 What is CANA?
@@ -15,10 +16,10 @@ What is CANA?
 
 The CANA package stands for "*Codes for ANalysis of Asteroids*". The tool was designed to perform scientific analysis for asteroids spectroscopic data.
 
-As part of the PRIMitive Spectroscopic Survey (PRIMASS), we have collected and anaylized hundreds of spectra of primitive asteroids among the last years.
-In this context we collected the routines that we typically use for the analysis and parametrization of these data to make a package.
-As we are preparing to make the data library (PRIMASS-L) public to the comunity through 
-`Small Bodie Node of the the Planetary Data Science (PDS) <https://pds-smallbodies.astro.umd.edu/>`_, it is our aim to make our science reproductible and of easy access. 
+As part of the PRIMitive Asteroids Spectroscopic Survey (PRIMASS), we have collected and analyzed hundreds of spectra of primitive asteroids among the last years.
+In this context, we collected the routines used for the analysis and parametrization of these data to build up a python package aimed for the asteroid community.
+As we are preparing to make the data library (PRIMASS-L) public to the community through
+`Small Bodies Node of the the Planetary Data Science (PDS) <https://pds-smallbodies.astro.umd.edu/>`_, it is our aim to make our science reproducible and of easy to extended.
 
 
 Contents
@@ -40,7 +41,7 @@ As Python 2.7 is coming to an end, we have updated all code for Python >=3.6, an
 
 We recommend using the `Anaconda Python distribution <https://www.anaconda.com/distribution/>`_ to ensure you have all dependencies installed.
 
-If you have any problems with the instalation, check if all dependencies are installed.
+If you have any problems with the installation, check if all dependencies are installed.
 The dependencies can be seen below:
 
 - `Numpy <http://www.numpy.org/>`__
@@ -61,7 +62,7 @@ You can get the latest stable version
 
 Unpack it if necessary, and go into the directory "*cana-master*", then run the below commands on a terminal shell:
 
-:: 
+::
 
    python setup.py install
 
@@ -69,14 +70,14 @@ Unpack it if necessary, and go into the directory "*cana-master*", then run the 
 Get Started
 -----------
 
-See the documentation page to get started!
+See the `documentation page <https://readthedocs.org/projects/cana/badge/?version=latest>`_ to get started!
 
 
 Cite
 ----
 CANA is a open tool. You can use, adapt and modify it as wanted. But if you any of these, please cite us!
 
-   De Pra, M., Carvano, J., Morate, D., Licandro, J. Pinilla-Alonso, N. (2018). CANA: An open-source python tool to study hydration in the Solar System. 
+   De Pra, M., Carvano, J., Morate, D., Licandro, J. Pinilla-Alonso, N. (2018). CANA: An open-source python tool to study hydration in the Solar System.
 
 See `cite <cite.html>`_ to get the bibtex entry for the citation.
 
@@ -85,7 +86,7 @@ See `cite <cite.html>`_ to get the bibtex entry for the citation.
 .. |docs| image:: https://readthedocs.org/projects/cana/badge/?version=latest
    :target: https://cana.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-   
+
 .. |build| image:: https://travis-ci.org/depra/cana.svg?branch=master
    :target: https://travis-ci.org/depra/cana
    :alt: Build Status
