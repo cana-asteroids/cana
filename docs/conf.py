@@ -17,7 +17,7 @@ import sphinx_bootstrap_theme
 import sphinx_gallery
 from sphinx_gallery.sorting import FileNameSortKey
 # -- Project information -----------------------------------------------------
-sys.path.append(os.path.pardir)
+# sys.path.append(os.path.pardir)
 
 
 project = 'CANA'
