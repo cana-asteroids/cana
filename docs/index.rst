@@ -77,8 +77,8 @@ Get Started
 See the `install instructions <install.html>`_ to set up your computer and install Cana.
 
 Once you have everything installed, we recommend you take a look at our recipes at the
-`Cookbook <cookbook.html>`_, to get an idea of what cana can do. For more detailed
-documentation go to the `Documentation page <api.html>`_ to get the complete API description.
+`Cookbook <gallery/index.html>`_, to get an idea of what cana can do. For more detailed
+documentation go to the `Documentation page <api/index.html>`_ to get the complete API description.
 
 Cana is still a work in progress, if you are have trouble getting it to work,
 or you want to give us a feedback or colaborate, you can:

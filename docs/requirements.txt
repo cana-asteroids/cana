@@ -1,5 +1,6 @@
 sphinx-bootstrap-theme
 sphinx-gallery
+numpydoc
 numpy
 scipy
 pandas

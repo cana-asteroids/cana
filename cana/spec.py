@@ -127,7 +127,7 @@ class Spectrum(np.recarray):
             The spectrum label
 
     --Atributes
-    ----------
+    -----------
         res: float
             The spectrum resolution (number of points).
 

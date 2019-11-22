@@ -13,8 +13,11 @@
 import os
 import sys
 import sphinx_bootstrap_theme
-import sphinx_gallery
-from sphinx_gallery.sorting import FileNameSortKey
+# import sphinx_gallery
+# from sphinx_gallery.sorting import FileNameSortKey
+import matplotlib as mpl
+mpl.use("Agg")
+import numpydoc
 # -- Project information -----------------------------------------------------
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -29,19 +32,19 @@ author = 'M. De Pra'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-#    'sphinx.ext.autodoc',
-#    'sphinx.ext.autosummary',
+   'sphinx.ext.autodoc',
+   'sphinx.ext.autosummary',
 #    'sphinx.ext.coverage',
 #    'sphinx.ext.mathjax',
-#    'sphinx.ext.doctest',
-#    'sphinx.ext.viewcode',
+   'numpydoc',
+   'sphinx.ext.viewcode',
 #    'sphinx.ext.extlinks',
 #    'matplotlib.sphinxext.plot_directive',
     'sphinx_gallery.gen_gallery']
-
-plot_formats = [("png", 90)]
-plot_html_show_formats = False
-plot_html_show_source_link = False
+#
+# plot_formats = [("png", 90)]
+# plot_html_show_formats = False
+# plot_html_show_source_link = False
 #min_reported_time = 0
 #if 'SOURCE_DATE_EPOCH' in os.environ:
 #    min_reported_time = sys.maxint if sys.version_info[0] == 2 else sys.maxsize
@@ -52,7 +55,6 @@ sphinx_gallery_conf = {
     'doc_module': ('sphinx_gallery', 'numpy'),
     'examples_dirs': '../cookbook',
     'gallery_dirs': 'gallery',
-    'backreferences_dir': False,
 #    'image_scrapers': image_scrapers,
 #    # specify the order of examples to be according to filename
 #    'within_subsection_order': FileNameSortKey,
@@ -63,6 +65,10 @@ sphinx_gallery_conf = {
 #    'capture_repr': ('_repr_html_', '__repr__'),
 }
 
+
+# Produce pages for each class and function
+autosummary_generate = True
+autodoc_default_flags = ['members']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
