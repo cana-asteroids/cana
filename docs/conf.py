@@ -12,11 +12,16 @@
 #
 import os
 import sys
+<<<<<<< HEAD
 sys.path.insert(0, os.path.abspath('..'))
+=======
+>>>>>>> master
 import sphinx_bootstrap_theme
 import sphinx_gallery
 from sphinx_gallery.sorting import FileNameSortKey
 # -- Project information -----------------------------------------------------
+sys.path.append(os.path.pardir)
+
 
 project = 'CANA'
 copyright = '2019, M. De Pra'
