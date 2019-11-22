@@ -16,8 +16,7 @@ import sphinx_bootstrap_theme
 import sphinx_gallery
 from sphinx_gallery.sorting import FileNameSortKey
 # -- Project information -----------------------------------------------------
-sys.path.insert(0, os.path.abspath('..'))
-
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 project = 'CANA'
 copyright = '2019, M. De Pra'
