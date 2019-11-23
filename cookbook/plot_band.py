@@ -16,12 +16,12 @@ spec = getspectrum('000752', ref='primass')
 
 ## Define region to measure the band
 # The wavelength where the band starts
-wmin = 0.55       
+wmin = 0.55
 # The wavelength where the band ends
-wmax = 0.85         
+wmax = 0.85
 # The wavelength windows to calculate the continuun.
 # A value of 0.03 means that the continuum will be measure at 0.55-0.58 and 0.83-0.85 range
-continumn_window = 0.03 
+continumn_window = 0.03
 
 
 # Methodology to estimate uncertainty
@@ -40,7 +40,7 @@ band_depth.plot()
 # check if the values can be considered an absortium band.
 minimum_depth = 1.             # The minimum depth value for it to be considered a band
 theoric_minimum_position = 0.7 # The central wavelengh of the theorical band
-maximum_distance = 0.0         # The maximum distance from the calculated center to the theorical center
+maximum_distance = 0.05        # The maximum distance from the calculated center to the theorical center
 sigma_level = 3                # The sigma level from the depth and the spetrum noise
 
 print('Is an absortion band detected?')
@@ -68,6 +68,3 @@ errormodel = cana.spectools.SpecError(method='rms', n=1000)
 
 # Calculating the band parameters
 band_depth = depthmodel.measure(spec, error=errormodel)
-
-
-
