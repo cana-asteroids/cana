@@ -4,9 +4,10 @@ from setuptools import setup
 
 # PACKAGE METADATA
 # ##################
-NAME = 'Cana'
+NAME = 'cana-asteroids'
+FULLNAME = "CANA"
 VERSION = '0.1'
-DESCRIPTION = 'Compositional ANalysis of Asteroids'
+DESCRIPTION = 'Codes for ANalysis of Asteroids'
 with open("README.rst") as f:
     LONG_DESCRIPTION = ''.join(f.readlines())
 AUTHOR = '''M. De Pra, J. Carvano, D. Morate,
@@ -14,8 +15,8 @@ AUTHOR = '''M. De Pra, J. Carvano, D. Morate,
 AUTHOR_EMAIL = 'mariondepra@gmail.com'
 MAINTAINER = 'M. De Pra'
 MAINTAINER_EMAIL = AUTHOR_EMAIL
-URL = 'https/github'
-LICENSE = 'NONE'
+URL = 'https://github.com/depra/cana'
+LICENSE = 'MIT License'
 
 # TO BE INSTALLED
 # ##################
