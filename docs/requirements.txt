@@ -1,9 +1,6 @@
 sphinx-bootstrap-theme
 sphinx-gallery
-<<<<<<< HEAD
-=======
 numpydoc
->>>>>>> readme
 numpy
 scipy
 pandas
