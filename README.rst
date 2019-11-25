@@ -53,14 +53,20 @@ The dependencies can be seen below:
 Installing
 -----------
 
-You can get the latest stable version
+If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https://pypi.org/project/pip/>`_ installed:
+
+::
+
+      pip install cana-asteroids
+
+Os, alternatively, download the last release at
 `here <https://github.com/depra/cana/releases>`_, or clone the repository using git:
 
 ::
 
       git clone https://github.com/depra/cana.git
 
-Unpack it if necessary, and go into the directory "*cana-master*", then run the below commands on a terminal shell:
+Unpack it, if necessary, and go into the directory "*cana-master*", then run the below commands on a terminal shell:
 
 ::
 

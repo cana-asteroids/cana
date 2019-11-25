@@ -10,8 +10,18 @@ As Python 2.7 is coming to an end, we have updated all code for Python >=3.6, an
 We recommend using the `Anaconda Python distribution <https://www.anaconda.com/distribution/>`_ to ensure you have all dependencies installed.
 
 
-Installing
------------
+Installing with pip (recommended)
+---------------------------------
+
+If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https://pypi.org/project/pip/>`_ installed:
+
+::
+
+      pip install cana-asteroids
+
+
+Manual download and install
+---------------------------
 
 You can get the latest stable version
 `here <https://github.com/depra/cana/releases>`_, or clone the repository using git:
