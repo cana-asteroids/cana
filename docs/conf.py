@@ -19,12 +19,8 @@ import matplotlib as mpl
 mpl.use("Agg")
 import numpydoc
 # -- Project information -----------------------------------------------------
-<<<<<<< HEAD
-sys.path.append(os.path.pardir)
-
-=======
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
->>>>>>> readme
+
 
 project = 'CANA'
 copyright = '2019, M. De Pra'
