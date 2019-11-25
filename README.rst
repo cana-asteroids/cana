@@ -9,7 +9,7 @@
    :alt: Codes for ANalisis of Asteroids
    :target: https://cana.readthedocs.io/en/latest/?badge=latest
 
-|build| |docs|
+|pypi| |build| |docs|
 
 What is CANA?
 -------------
@@ -96,3 +96,7 @@ See `cite <cite.html>`_ to get the bibtex entry for the citation.
 .. |build| image:: https://travis-ci.org/depra/cana.svg?branch=master
    :target: https://travis-ci.org/depra/cana
    :alt: Build Status
+   
+.. |pypi| image:: https://badge.fury.io/py/cana-asteroids.svg
+   :target: https://pypi.org/project/cana-asteroids/
+   :alt: Version
