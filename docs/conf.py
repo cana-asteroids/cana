@@ -14,7 +14,7 @@ import os
 import sys
 import sphinx_bootstrap_theme
 # import sphinx_gallery
-# from sphinx_gallery.sorting import FileNameSortKey
+from sphinx_gallery.sorting import FileNameSortKey
 import matplotlib as mpl
 mpl.use("Agg")
 import numpydoc
@@ -58,7 +58,7 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'gallery',
 #    'image_scrapers': image_scrapers,
 #    # specify the order of examples to be according to filename
-#    'within_subsection_order': FileNameSortKey,
+    'within_subsection_order': FileNameSortKey
 #    'min_reported_time': min_reported_time,
 #    'show_memory': True,
 #    # capture raw HTML or, if not present, __repr__ of last expression in

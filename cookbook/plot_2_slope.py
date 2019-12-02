@@ -26,7 +26,7 @@ iterations = 1000
 
 # Measuring the slope
 slope = cana.slope(spec, wmin=wavemin, wmax=wavemax, norm=wavenorm,
-                      errormethod=errormethod, montecarlo=iterations)
+                   errormethod=errormethod, montecarlo=iterations)
 
 # print the results
 print(slope)

@@ -22,3 +22,8 @@ def testtaxonomy():
 def testband():
     r"""Test band depth."""
 #         spec = cana.datasets.getspectrum('000334', ref='primass')
+
+
+
+def testpipeline():
+    r"""Test for pipeline"""

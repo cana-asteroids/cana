@@ -18,7 +18,8 @@ def depth(spec, wmin=0.54, wmax=0.88, cont_window=0.04, resolution='auto',
     Parameters
     ----------
     spec: Spectrum, spectrum file, spectrum file list
-        The imput can be
+        The input can be a Spectrum object, a spectrum file or
+        a list of spectrum files
 
     wmin: float
         The wavelength for the beginning of the band.

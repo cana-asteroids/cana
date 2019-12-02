@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# documentation self generated files
+docs/gallery/
+docs/api/generated
+
 # C extensions
 *.so
 

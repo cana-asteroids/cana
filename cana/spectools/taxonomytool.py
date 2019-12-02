@@ -102,7 +102,7 @@ def taxonomy(spec, system='demeo', method='chisquared', return_n=3, norm=0.55,
     -------
     Taxonomic classification.
     """
-    tax = Taxonomy(tax=system, norm=norm)
+    tax = Taxonomy(system=system, norm=norm)
     speckwars_default = {'unit': 'micron'}
     speckwargs = kwargupdate(speckwars_default, speckwargs)
     if not isinstance(spec, list):
@@ -140,8 +140,8 @@ class Taxonomy(object):
 
     """
 
-    def __init__(self, tax='demeo', norm=0.55):
-        self.system = tax.lower()
+    def __init__(self, system='demeo', norm=0.55):
+        self.system = system.lower()
         self.dataset, self.classes = self._load()
         self.norm = norm
 

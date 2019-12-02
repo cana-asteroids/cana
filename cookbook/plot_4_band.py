@@ -14,14 +14,15 @@ import cana
 
 spec = getspectrum('000752', ref='primass')
 
-## Define region to measure the band
+# Define region to measure the band
 # The wavelength where the band starts
 wmin = 0.55
 # The wavelength where the band ends
 wmax = 0.85
 # The wavelength windows to calculate the continuun.
-# A value of 0.03 means that the continuum will be measure at 0.55-0.58 and 0.83-0.85 range
-continumn_window = 0.03
+# A value of 0.03 means that the continuum will be measure
+#  at 0.55-0.58 and 0.83-0.85 range
+c_window = 0.03
 
 
 # Methodology to estimate uncertainty
@@ -29,7 +30,7 @@ errormethod = 'rms'
 iterations = 1000
 
 # Calculating the band parameters
-band_depth = cana.depth(spec, wmin=wmin, wmax=wmax, cont_window=continumn_window,
+band_depth = cana.depth(spec, wmin=wmin, wmax=wmax, cont_window=c_window,
                         errormethod=errormethod, montecarlo=iterations)
 
 # print the calculated band parameters
@@ -57,7 +58,7 @@ print(band_depth.is_band(min_depth=minimum_depth, theoric_min=theoric_minimum_po
 ###############################################
 
 # Defining methodoly for the continumn
-continumnmodel = cana.Continuum(lowerwindow=continumn_window, upperwindow=continumn_window)
+continumnmodel = cana.Continuum(lowerwindow=c_window, upperwindow=c_window)
 
 # creating the depth model
 depthmodel = cana.Depth(wmin=wmin, wmax=wmax, continuum=continumnmodel)

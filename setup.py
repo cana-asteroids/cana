@@ -22,7 +22,7 @@ LICENSE = 'MIT License'
 # ##################
 PACKAGES = ['cana',
             'cana.spectools',
-#            'cana.slopeutils',
+            'cana.pipelines',
 #            'cana.taxutils',
             'cana.datasets']
 #            'cana.errormodels',

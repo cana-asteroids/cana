@@ -1,2 +1,2 @@
 # pylint: disable=missing-docstring,import-outside-toplevel
-from .specpipe import primitive_visible
+from .specpipes import primitive_visible

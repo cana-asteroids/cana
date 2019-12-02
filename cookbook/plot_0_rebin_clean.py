@@ -1,6 +1,6 @@
 """
-Rebining and using sigma-clip to clean the spectrum from bad points
--------------------------------------------------------------------
+Rebining and cleaning the spectrum from bad points
+--------------------------------------------------
 """
 
 import matplotlib.pyplot as plt
