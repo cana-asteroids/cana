@@ -2,6 +2,7 @@ r"""Utility functions."""
 
 import numpy as np
 import pandas as pd
+from scipy.interpolate import UnivariateSpline
 
 
 def find_nearest(array, value):
@@ -48,6 +49,62 @@ def kwargupdate(defaults, options):
         if key not in options.keys():
             options[key] = value
     return options
+
+
+def curvature(func, x, ftype='polynomial', order=4):
+    r"""
+    Measure the curvature of a function.
+
+    Parameters
+    ----------
+    func: coefcients, spline or function
+        The function for deriving the curvature. F(x)
+
+    x:
+        The x axis for the F(x) function.
+
+    ftype: string
+        'polynomial': func is the polynomial coefcients arrays
+        'spline': func is a scipy.UnivariateSpline object
+        'analytical': a self defined function
+
+    order: int (optional)
+        The order for fitting the analytical function.
+        Only used if ftype='analytical'
+
+    Returns
+    -------
+    The curvature array
+
+    """
+    if ftype == 'polynomial':
+        # getting polynomial derivatives
+        func_ = np.polyder(func)
+        func_2 = np.polyder(func, m=2)
+        # building arrays with derived polynomial
+        y_ = np.polyval(func_, x)
+        y_2 = np.polyval(func_2, x)
+    if ftype == 'analytical':
+        # fitting analytical function with a spline
+        spl = UnivariateSpline(x, func(x), k=order)
+        ftype = 'spline'
+    if ftype == 'spline':
+        # deriving function
+        func_ = spl.derivative()
+        func_2 = spl.derivative(n=2)
+        y_ = func_(x)
+        y_2 = func_2(x)
+    # normalizing vectors according to the first derivative
+    y_norm = np.median(y_)
+    y_ = y_/y_norm
+    y_2 = y_2/y_norm
+    # building terms of the curvature
+    aux = np.power((np.power(y_, 2) + 1), 1.5)
+    aux2 = y_2
+    # calculating curvature and radius of curvature
+    r = aux/aux2
+    k = 1/r
+    return k
 
 
 class Parameter(object):
