@@ -475,7 +475,7 @@ class Spectrum(np.recarray):
             self.r = self.r / np.mean(self.r[aux])
         return self
 
-    def mask_region(self, wmin, wmax):
+    def mask_region(self, region=[(1.3, 1.45), (1.8, 1.95)]):
         r"""
         Exclude a region of the spectrum.
 
@@ -492,16 +492,45 @@ class Spectrum(np.recarray):
         The Spectrum array without the masked region
 
         """
-        aux = np.argwhere((self.w > wmin) & (self.w < wmax))
-        mask = np.ones(len(self.w), dtype=bool)
+        if isinstance(region[0], float) or isinstance(region[0], int):
+            masked_spec = self.mask_region_aux(self, wmin=region[0],
+                                               wmax=region[1])
+        else:
+            masked_spec = self
+            for rr in region:
+                masked_spec = self.mask_region_aux(masked_spec,
+                                                   wmin=rr[0],
+                                                   wmax=rr[1])
+        return masked_spec
+
+    @staticmethod
+    def mask_region_aux(spec, wmin, wmax):
+        r"""
+        Exclude a region of the spectrum.
+
+        Parameters
+        ----------
+        w_min: float
+            Wavelength lower limit of the masked region
+
+        w_max: float
+            Wavelength upper limit of the masked region
+
+        Returns
+        -------
+        The Spectrum array without the masked region
+
+        """
+        aux = np.argwhere((spec.w > wmin) & (spec.w < wmax))
+        mask = np.ones(len(spec.w), dtype=bool)
         mask[aux] = 0
-        w = self.w[mask]
-        r = self.r[mask]
-        r_unc = self.r_unc
+        w = spec.w[mask]
+        r = spec.r[mask]
+        r_unc = spec.r_unc
         if r_unc is not None:
-            r_unc = self.r_unc[mask]
-        return Spectrum(w=w, r=r, r_unc=r_unc, unit=self.unit,
-                        path=self.path, label=self.label)
+            r_unc = spec.r_unc[mask]
+        return Spectrum(w=w, r=r, r_unc=r_unc, unit=spec.unit,
+                        path=spec.path, label=spec.label)
 
     def save(self, fname, fmt='%.5f', delimiter=' ', header='', footer='',
              comments='#', encoding=None):

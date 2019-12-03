@@ -18,7 +18,7 @@ spec = cana.datasets.getspectrum('000334', ref='primass')
 specfit, coefs = spec.autofit(degree_min=1, degree_max=12)
 
 # Ploting
-plt.plot(spec.w, spec.r, c='0.1', label='Spectrum')
+plt.plot(spec.w, spec.r, c='0.3', lw=1, label='Spectrum')
 plt.plot(specfit.w, specfit.r, c='r', label='Fit')
 plt.legend()
 plt.show

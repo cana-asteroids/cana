@@ -10,7 +10,7 @@ import cana
 
 # For the example, we will just gonna use one from the available datasets.
 
-spec = cana.datasets.getspectrum('000334', ref='primass')
+spec = cana.datasets.getspectrum('000752', ref='primass')
 
 # Defining parameters that will be used in the pipeline
 # We are explicitating here, but all values above are actually set as default
