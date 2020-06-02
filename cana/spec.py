@@ -19,7 +19,7 @@ from .util import find_nearest, kwargupdate
 def loadspec(filename, unit='micron', r_error_col=None,
              masknull=True, label=None, **kwargs):
     r"""
-    Load a spectrum file and to an Spectrum object.
+    Load a spectrum file and a Spectrum object.
 
     Parameters
     ----------
