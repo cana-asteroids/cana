@@ -13,7 +13,7 @@ def getspectrum(aid, ref='primass'):
 
     Parameters
     ----------
-    sid: integer
+    aid: integer
         The asteroid number identification
 
     ref: str
