@@ -399,6 +399,7 @@ class Spectrum(np.recarray):
         ----------
         binsize: int
             The number of points in the bin.
+            Default is 11
 
         method: str
             The method for the rebinning. Options are:
