@@ -20,7 +20,7 @@ spec.plot(fax=ax[0], speckwargs={'label':'Raw'})
 
 # Rebining spectrum
 
-spec_rebin = spec.rebin(binsize=11)
+spec_rebin = spec.rebin()
 
 spec_rebin.plot(fax=ax[1], speckwargs={'label':'Rebinned'})
 
@@ -31,7 +31,3 @@ spec_clean = spec.clean_spec(method='sigmaclip', sigma=3, fit='auto')
 spec_clean.plot(fax=ax[2], speckwargs={'label':'Cleaned'})
 
 plt.show()
-
-
-
-
