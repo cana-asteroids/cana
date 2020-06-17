@@ -14,19 +14,10 @@ import cana
 
 spec = getspectrum('000334', ref='primass')
 
-# Defining parameters for calculating the slope
-wavemin = 0.4
-wavemax = 0.9
-wavenorm = 0.55
-
-
-# Methodology to estimate uncertainty
-errormethod = 'rms'
-iterations = 1000
-
 # Measuring the slope
-slope = cana.slope(spec, wmin=wavemin, wmax=wavemax, norm=wavenorm,
-                   errormethod=errormethod, montecarlo=iterations)
+# Defaults: wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
+#           error_param=None, montecarlo=1000, speckwargs=None
+slope = cana.slope(spec)
 
 # print the results
 print(slope)
