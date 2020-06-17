@@ -24,14 +24,12 @@ wmax = 0.85
 #  at 0.55-0.58 and 0.83-0.85 range
 c_window = 0.03
 
-
-# Methodology to estimate uncertainty
-errormethod = 'rms'
-iterations = 1000
-
 # Calculating the band parameters
-band_depth = cana.depth(spec, wmin=wmin, wmax=wmax, cont_window=c_window,
-                        errormethod=errormethod, montecarlo=iterations)
+# Defaults: wmin=0.54, wmax=0.88, cont_window=0.04, resolution='auto',
+#          errormethod='rms', error_param=None, montecarlo=1000,
+#          min_depth=1., theoric_min=0.7, max_dist=0.05, n_sigma=3,
+#          speckwargs=None
+band_depth = cana.depth(spec, wmin=wmin, wmax=wmax, cont_window=c_window)
 
 # print the calculated band parameters
 print(band_depth)
@@ -39,14 +37,9 @@ print(band_depth)
 band_depth.plot()
 
 # check if the values can be considered an absortium band.
-minimum_depth = 1.             # The minimum depth value for it to be considered a band
-theoric_minimum_position = 0.7 # The central wavelengh of the theorical band
-maximum_distance = 0.05        # The maximum distance from the calculated center to the theorical center
-sigma_level = 3                # The sigma level from the depth and the spetrum noise
-
+# is_band Defaults: min_depth=1., theoric_min=0.7, max_dist=0.05, sigma=3
 print('Is an absortion band detected?')
-print(band_depth.is_band(min_depth=minimum_depth, theoric_min=theoric_minimum_position,
-                         max_dist=maximum_distance, sigma=sigma_level))
+print(band_depth.is_band())
 
 
 # Note: cana.depth can also get the direct spectrum file path,
