@@ -22,12 +22,15 @@ def slope(spec, wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
 
     wmin: float
         wavelength lower limit for the adjust.
+        Default: 0.4
 
     wmax: float
         wavelength upper limit for the adjust.
+        Default: 0.9
 
     norm: float
-        The wavelength for normalizing the slope
+        The wavelength for normalizing the slope.
+        Default: 0.55
 
     errormethod: 'rms', 'removal' or 'bin'
         The error methodology that will be applied for estimating the
