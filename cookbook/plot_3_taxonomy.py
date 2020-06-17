@@ -5,23 +5,15 @@ Taxonomic classification
 
 import cana
 
-# First load an spectrum
+# First load an spectrum, we will just gonna use one from the available datasets.
 # you can do: spec = cana.loadspec('path to your spectrum file')
-
-# For the example, we will just gonna use one from the available datasets.
 
 spec = cana.datasets.getspectrum('000334', ref='primass')
 
-# Defining parameters for taxonomic classitication
-taxonomy_system = 'bus'
-classification_method = 'chisquared'
-return_n = 3
-fitspec = True
-
-
 # Perform taxonomic classification
-tax = cana.taxonomy(spec, system=taxonomy_system, method=classification_method,
-                    return_n=return_n, fitspec=fitspec)
+# Defults: system='demeo', method='chisquared', return_n=3, norm=0.55,
+#             fitspec=True, speckwargs=None
+tax = cana.taxonomy(spec)
 
 # print the results
 print(tax)
