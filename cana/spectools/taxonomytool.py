@@ -80,20 +80,23 @@ def taxonomy(spec, system='demeo', method='chisquared', return_n=3, norm=0.55,
             and filled when the classify method is called.
 
         system: str
-            The taxonomic system. Default is 'demeo', for
-            a classification in the Bus-Demeo scheme.
-            Options are: 'demeo'.
+            The taxonomic system.For a classification in the Bus-Demeo scheme.
+            Options are: 'demeo', 'bus'
+            Default: 'demeo'
 
         method: str
-            The classification method. Defalt is 'chi-squared'
+            The classification method.
+            Defalt: 'chi-squared'
 
         fitspec: boolean
             If required to fit the spectrum before interpolating the
-            values to the comparison wavelengths. Default is True.
+            values to the comparison wavelengths.
+            Default: True
 
         return_n: int
-            The number of classes to output. Default is 1, which will
+            The number of classes to output. Which will
             output the class with the lowest chi-squared value.
+            Default: 3
 
         norm: float
             The normalization point.
