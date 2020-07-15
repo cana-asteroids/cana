@@ -3,7 +3,7 @@
 Cookbook
 ========
 
-See bellow some basic usage examples:
+See below some basic usage examples:
 
 Spectroscopy
 ------------
