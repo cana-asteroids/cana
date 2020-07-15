@@ -46,9 +46,9 @@ def slope(spec, wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
 
     Returns
     -------
-    SlopeValue or Pandas.DataFrame
-        For a single spectrum it will return a SlopeValue, for a list
-        of spectra, returns a pandas.DataFrame with the results
+    slp: SlopeValue or Pandas.DataFrame
+        For a single spectrum it will return a SlopeValue
+        For a list of spectra, returns a pandas.DataFrame with the results.
 
     """
     slopemodel = Slope(wmin=wmin, wmax=wmax, norm=norm)
@@ -67,12 +67,12 @@ def slope(spec, wmin=0.4, wmax=0.9, norm=0.55, errormethod='rms',
             slp_aux = slopemodel.measure(sp, error=error)
             aux.append(slp_aux.DataFrame.T)
         slp = pd.concat(aux)
-    return slp
 
+    return slp
 
 class Slope(object):
     r"""
-    Calculate  the spectral gradient of a spectrum.
+    Calculate the spectral gradient of a spectrum.
 
     Methods
     -------
@@ -120,8 +120,8 @@ class Slope(object):
 
         Returns
         -------
-        The slope value. If error==True, then also returns the
-        uncertainty.
+        slp: The slope value.
+            If error==True, then also returns the uncertainty.
 
         """
         # Trimming the spectrum in the defined region
@@ -131,7 +131,7 @@ class Slope(object):
         # filling class atributes
         if error is None:
             slp_value = self._calc_slope(slspec)
-            slp_unc = None
+            slp_unc   = None
         else:
             slp_value, slp_unc = error.estimate(slspec, self._calc_slope,
                                                 error.n, error.param)
@@ -209,13 +209,12 @@ class SlopeValue(Slope, Parameter):
             will open a new plt.figure()
 
         show (Optional): boolean
-            True if want to plt.show(). Default is True.
+            True if want to plt.show().
 
         savefig (Optional): str
             The path to save the figure. If set to None, wont save the figure.
-            Default is None
 
-        **kwargs: matplotlib plot kwargs
+        **kwargs: See matplotlib.pyplot.plot kwargs
 
         """
         # checking if plot in another frame
@@ -223,18 +222,23 @@ class SlopeValue(Slope, Parameter):
             fig = plt.figure()
             fax = fig.gca()
         # setting default values for image plot with matplotlib
-        specsty_defaults = {'c': '0.3', 'lw': '1', 'zorder': 0}
+        specsty_defaults   = {'c': '0.3', 'lw': '1', 'zorder': 0}
         legendsty_defaults = {'loc': 'best'}
+
         label = '{0} $\pm$ {1}'.format(self.slope, self.slope_unc)
+
         slopesty_defaults = {'c': 'r', 'lw': '2', 'zorder': 1, 'label': label}
+
         # updating plot styles
-        speckwargs = kwargupdate(specsty_defaults, speckwargs)
+        speckwargs   = kwargupdate(specsty_defaults, speckwargs)
         legendkwargs = kwargupdate(legendsty_defaults, legendkwargs)
-        slopekwargs = kwargupdate(slopesty_defaults, slopekwargs)
+        slopekwargs  = kwargupdate(slopesty_defaults, slopekwargs)
+
         # Ploting the spec
         self.spec = self.spec.normalize(self.model.norm, window=0.03)
         self.spec.plot(fax=fax, axistitles=axistitles, show=False,
                        speckwargs=speckwargs)
+
         # ploting the slope
         fspec, _ = self.spec.fit(order=1, ftype='polynomial')
         fspec = fspec.normalize(self.model.norm, window=0.03)
