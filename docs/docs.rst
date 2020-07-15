@@ -26,7 +26,7 @@ Documentation (version |version|)
         <div class="col-md-6">
             <h3><a href="cookbook.html">Cookbook</a></h3>
             <em>
-            Beginer recipes to get started 
+            Beginner recipes to get started
             </em>
         </div> 
        <div class="col-md-6">
