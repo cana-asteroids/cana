@@ -19,7 +19,7 @@ from .util import find_nearest, kwargupdate
 def loadspec(filename, unit='micron', r_error_col=None,
              masknull=True, label=None, **kwargs):
     r"""
-    Load a spectrum file to a Spectrum object
+    Loads a spectrum file in units of *unit*. Returns a new Spectrum object
 
     Parameters
     ----------
@@ -28,25 +28,22 @@ def loadspec(filename, unit='micron', r_error_col=None,
 
     unit: str
         The wavelength unit. Possible values are: 'micron', 'angstron',
-        'nanometer'. Default is 'micron'.
+        'nanometer'.
 
     r_error_col: None or integer (optional)
-        The collumn for the errors in the reflectance.
-        Default is None
+        The column for the errors in the reflectance.
 
     masknull: boolean (optional)
-        If True removes points where the wavelength is zero. Default
-        is True
+        If True removes points where the wavelength is zero.
 
     label: None or string (optional)
         The spectrum label. If None it will take the file basename.
-        Default is None.
 
-    **kwargs: Other arguments for numpy.loadtxt
+    **kwargs: Other arguments. See numpy.loadtxt
 
     Returns
     -------
-    A Spectrum object
+    spec: Spectrum object
 
     """
     # setting default values for loading the spectrum file
@@ -54,18 +51,24 @@ def loadspec(filename, unit='micron', r_error_col=None,
     for k in default_kwargs:
         if k not in kwargs:
             kwargs[k] = default_kwargs[k]
+
     # Loading the file using numpy.loadtxt
     spec_data = np.loadtxt(filename, **kwargs)
+
     # masking zero values in the wavelength array
     if masknull:
-        mask = np.argwhere(spec_data[0] == 0)
+        mask      = np.argwhere(spec_data[0] == 0)
         spec_data = np.delete(spec_data, mask, axis=1)
+
     # inserting it in as a Spectrum object
     if r_error_col is not None:
         r_error_col = spec_data[r_error_col]
+
     # setting the label
     if label is None:
         label = basename(splitext(filename)[0])
+
+    # creating Spectrum object with given data
     spec = Spectrum(w=spec_data[0], r=spec_data[1],
                     r_unc=r_error_col, unit=unit,
                     path=filename, label=label)
@@ -78,9 +81,9 @@ def stack_spec(tup):
 
     Parameters
     ----------
-    tup : sequence of Spectrum
-          The arrays must have the same shape along all but the second axis,
-          except 1-D arrays which can be any length.
+    tup : array of Spectrum objects
+          A sequence of Spectrum that must be the same shape along all but
+          the second axis. 1-D arrays can be any length.
 
     Returns
     -------
@@ -90,11 +93,13 @@ def stack_spec(tup):
 
     """
     wave = np.hstack((i.w for i in tup))
-    ref = np.hstack((i.r for i in tup))
-    spec = Spectrum(w=wave, r=ref, r_unc=None, unit=tup[0].unit,
+    ref  = np.hstack((i.r for i in tup))
+
+    stacked = Spectrum(w=wave, r=ref, r_unc=None, unit=tup[0].unit,
                     path=None, label=tup[0].label)
-    spec.sort(order='w')
-    return spec
+    stacked.sort(order='w')
+
+    return stacked
 
 
 class Spectrum(np.recarray):
@@ -116,7 +121,7 @@ class Spectrum(np.recarray):
         unit: str
             The wavelength units. Default is 'microns'.
 
-        r_unc: numpy array (optinal)
+        r_unc: numpy array (optional)
             array corresponding to the relative reflectance
             uncertainty of the asteroid
 
@@ -208,7 +213,7 @@ class Spectrum(np.recarray):
 
         Returns
         -------
-        self
+        self : Spectrum object
             the trimmed spectrum.
 
         """
@@ -229,12 +234,16 @@ class Spectrum(np.recarray):
             Order of the fitting.
 
         ftype: str
-            Type of algorithm to use for the fitting. Options are: 'spline' or
-            'polynomial'. Default is 'spline'.
+            Type of algorithm to use for the fitting.
+            Options are: 'spline' or 'polynomial'.
 
         Returns
         -------
-        The fitted spectrum array, the fitting coefcients
+        fspec: Spectrum Object
+            The fitted spectrum array
+
+        fcoefs: array-like
+            the fitting coefficients
 
         """
         # Performing the fit
@@ -244,9 +253,9 @@ class Spectrum(np.recarray):
         elif ftype == 'polynomial':
             fcoefs = np.polyfit(self.w, self.r, order)
             fspec_y = np.polyval(fcoefs, self.w)
-        yerr = np.abs(fspec_y - self.r)
+        y_err = np.abs(fspec_y - self.r)
         # building new array
-        fspec = Spectrum(w=self.w, r=fspec_y, r_unc=yerr, unit=self.unit,
+        fspec = Spectrum(w=self.w, r=fspec_y, r_unc=y_err, unit=self.unit,
                          path=self.path, label=self.label)
         return fspec, fcoefs
 
@@ -264,8 +273,11 @@ class Spectrum(np.recarray):
 
         Returns
         -------
-        The fitted spectrum array, the fitting coefcients
+        fspec: Spectrum Object
+            The fitted spectrum array
 
+        fcoefs: array-like
+            the fitting coefficients
         """
         # degrees which we will test the fitting
         degrees = np.arange(degree_min, degree_max+1)
@@ -280,7 +292,7 @@ class Spectrum(np.recarray):
 
     def _autofit_aux(self, degree):
         r"""Auxiliary funtion for the autofit method."""
-        # creating polinomial and reshaping array for model valitation
+        # creating polynomial and reshaping array for model validation
         polynom = PolynomialFeatures(degree=degree, include_bias=False)
         x_train = self.w.reshape((-1, 1))
         x_train_trans = polynom.fit_transform(x_train)
@@ -310,7 +322,8 @@ class Spectrum(np.recarray):
 
         Returns
         -------
-        The estimated snr value
+        rms: float
+            The estimated snr value
 
         """
         # fitting the spectrum
@@ -342,7 +355,8 @@ class Spectrum(np.recarray):
 
         Returns
         -------
-        The Spectrum with removed "bad" points
+        spec: Spectrum
+            Spectrum object with outliers removed.
 
         """
         if fit == 'auto':
@@ -353,8 +367,10 @@ class Spectrum(np.recarray):
         cspec_index = [self._sigma_clip(val, sigma=sigma, cspec=cspec)
                        for val in cspec]
         aux = self[cspec_index]
-        return Spectrum(aux.w, aux.r, unit=self.unit,
+
+        spec = Spectrum(aux.w, aux.r, unit=self.unit,
                         path=self.path, label=self.label)
+        return spec
 
     def _sigma_clip(self, val, sigma, cspec):
         r"""Auxiliary method to perform sigma-clipping on array elements."""
@@ -397,18 +413,17 @@ class Spectrum(np.recarray):
         ----------
         binsize: int
             The number of points in the bin.
-            Default is 11
 
         method: str
-            The method for the rebinning. Options are:
-            'mean and 'median'. Default is 'median'.
+            The method for the rebinning.
+            Options are:'mean and 'median'.
 
         std: boolean
             If True, also returns the deviation.
             In the case of the median, returns the
             MAD (median absolute deviation).
 
-        rem_trend=False
+        rem_trend: boolean
 
         Returns
         -------
@@ -488,7 +503,8 @@ class Spectrum(np.recarray):
 
         Returns
         -------
-        The Spectrum array without the masked region
+        masked_spec: Spectrum
+            The Spectrum array without the masked region
 
         """
         if isinstance(region[0], float) or isinstance(region[0], int):
@@ -544,7 +560,6 @@ class Spectrum(np.recarray):
             loadspec understands gzipped files transparently.
 
         fmt : str or sequence of strs, optional
-
 
         delimiter : str, optional
             String or character separating columns.
