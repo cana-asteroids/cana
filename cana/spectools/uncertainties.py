@@ -122,7 +122,7 @@ def rms_resampling(spec):
 
     Returns
     -------
-    The resampled Spectrum
+    rspec: The resampled Spectrum
 
     """
     rms = spec.estimate_rms()
