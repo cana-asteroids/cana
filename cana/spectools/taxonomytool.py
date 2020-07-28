@@ -52,7 +52,7 @@ def _load_bus(fpath=PWD+'/../datasets/data/taxonomy/bus_demeo.tab'):
     Load the demeo PDS templates and trim to bus wavelegth coverage.
 
     Also excluding classes that does not exist in Bus taxonomy.
-    However, note ther it is not real bus templates.
+    However, note there are no real bus templates.
     """
     demeo = _load_demeo()[0]
     # Classes std_
@@ -103,7 +103,7 @@ def taxonomy(spec, system='demeo', method='chisquared', return_n=3, norm=0.55,
 
     Returns
     -------
-    Taxonomic classification.
+        tclass: Taxonomic classification
     """
     tax = Taxonomy(system=system, norm=norm)
     speckwars_default = {'unit': 'micron'}
@@ -167,15 +167,18 @@ class Taxonomy(object):
             and filled when the classify method is called.
 
         cmethod: str
-            The classification method. Defalt is 'chi-squared'
+            The classification method.
+             Defalt is 'chi-squared'
 
         fitspec: boolean
             If required to fit the spectrum before interpolating the
-            values to the comparison wavelengths. Default is True.
+            values to the comparison wavelengths.
+            Default is True.
 
         return_n: int
-            The number of classes to output. Default is 1, which will
-            output the class with the lowest chi-squared value.
+            The number of classes to output.
+            Default is 1: which will output the class with
+                          the lowest chi-squared value.
 
         Returns
         -------
@@ -215,7 +218,8 @@ class Taxonomy(object):
 
         Returns
         -------
-        The chi-squared value
+        chi: int or float
+            The chi-squared value
 
         """
         # normalizing both specs on the secound point
@@ -228,7 +232,9 @@ class Taxonomy(object):
         return chi
 
     def _prep_spec(self, spec, fitspec=True):
-        r"""Prepare asteroid spectrum for comparison with classes templates."""
+        r"""
+        Prepare asteroid spectrum for comparison with classes templates.
+        """
         # Searching the comparable region between the object and
         # taxonomic classes --> needs improvement
         comparable = np.argwhere((self.dataset['wavelength'] >= spec.w.min()-0.01) &
@@ -253,7 +259,9 @@ class Taxonomy(object):
 
     def plot_class(self, tclass, tax2comp=None, fax=None, axistitles=True,
                    show=True, legendkwargs=None, taxkwargs=None):
-        r"""Plot taxonomic class templates."""
+        r"""
+        Plot taxonomic class templates.
+        """
         taxsty_defaults = {'linestyle': '-', 'marker': 'o'}
         legendsty_defaults = {'loc': 'best'}
         legendkwargs = kwargupdate(legendsty_defaults, legendkwargs)
