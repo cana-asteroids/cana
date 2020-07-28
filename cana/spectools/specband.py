@@ -65,10 +65,9 @@ def depth(spec, wmin=0.54, wmax=0.88, cont_window=0.04, resolution='auto',
 
     Returns
     -------
-    DepthValue or Pandas.DataFrame
+    depth: DepthValue or Pandas.DataFrame
         For a single spectrum it will return a Depthvalue, for a list
         of spectra, returns a pandas.DataFrame with the results
-
     """
     error = SpecError(n=montecarlo, method=errormethod, param=error_param)
     cont = Continuum(lowerwindow=cont_window, upperwindow=cont_window)
@@ -172,7 +171,7 @@ class Continuum(object):
 
         Returns
         -------
-        2D numpy array of the spec_arr, with the continuum removed.
+        spec: 2D numpy array of the spec_arr, with the continuum removed.
 
         """
         # Fitting continuum
@@ -272,7 +271,9 @@ class Depth(object):
 
         Returns
         -------
-            DepthValue
+        band_min:
+
+        band_depth:   DepthValue
 
         """
         # Trimming spec to the band region
@@ -382,7 +383,7 @@ class DepthValue(Depth, Parameter):
 
         Returns
         -------
-        boolean
+        ans: boolean
 
         """
         # check if minimum is in within distance
