@@ -14,6 +14,8 @@ Spectroscopy
    :toctree: generated/
 
     spec
+    
+    util
 
 Spectools
 ---------
