@@ -9,9 +9,9 @@ CANA: Codes for ANalysis of Asteroids
             <div class="col-md-6 primass-about">
             <p>
              The CANA package arised in the context of the PRIMitive Asteroid Spectrocopic Survey (PRIMASS). As we move to make the first data release of the survey,
-            we provide a package is made of a collection of methodologies and codes that were used to analyze the survey data. These methodologies are strongly focused on the spectroscopic analysis of primitive asteroids, with codes that allow calculating the spectral gradient, identifing a hydration band and performing a taxonomic clasification, but all the methodologies can be applyied or easily extended for other classes of asteroids. 
+            we provided a package that is made up of a collection of methodologies and codes that were used to analyze the survey data. These methodologies are strongly focused on the spectroscopic analysis of primitive asteroids, with codes that allow calculating the spectral gradient, identifing a hydration band and performing a taxonomic classification. All the methodologies can be applyied or easily extended for other classes of asteroids. 
             <p>
-            The aim of this package is to make the science made by PRIMASS accessible, reproductible and extendable. 
+            The aim of this package is to make the science made by PRIMASS accessible, reproducible and extendable. 
 
          
             </p>
@@ -42,7 +42,7 @@ PRIMitive Asteroid Spectroscopic Survey
             
             <p>
             In 2010, we started a observational campaign, using several telescopes around the globe, with the goal of studying the surface of primitive asteroids at
-            different locations in the asteroid main  belt, by means of visible and near-infrared spectroscopy. 
+            different locations in the main asteroid belt, by means of visible and near-infrared spectroscopy. 
             To date we have nearly ~600 spectra of primitive asteroids that were published in more than 10 papers in the literature, and there is more to come!
          
             </p>
