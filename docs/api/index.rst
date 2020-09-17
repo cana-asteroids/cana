@@ -22,8 +22,7 @@ Spectools
 
 .. autosummary::
    :toctree: generated/
-   
-    spectools
+
     spectools.slopetool
     spectools.taxonomytool
     spectools.specband
