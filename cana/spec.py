@@ -139,9 +139,12 @@ class Spectrum(np.recarray):
     trim
     fit
     autofit
-    clean_spec
     estimate_rms
+    clean_spec
+    mad
     rebin
+    normalize
+    mask_region
     save
     plot
 
