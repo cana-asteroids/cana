@@ -1,10 +1,11 @@
 
+import pandas as pd
+import matplotlib.pyplot as plt
+
 from .. import loadspec, Spectrum, Depth, Slope, Taxonomy
 from ..spectools.uncertainties import SpecError
 from ..util import kwargupdate
 
-import pandas as pd
-import matplotlib.pyplot as plt
 
 
 def primitive_visible(spec, params='default', error=SpecError(),
@@ -105,7 +106,7 @@ def primitive_aux(spec, params, isband, error, outplot=None):
                                     columns=[spec.label]).T
     # Creating output image
     if outplot is not None:
-        fig, ax = plt.subplots(2, 2, figsize=(10, 10))
+        _, ax = plt.subplots(2, 2, figsize=(10, 10))
         spec.plot(fax=ax[0][0], show=False)
         if any(isinstance(par, Slope) for par in params):
             specslope.plot(fax=ax[0][1], show=False)
@@ -120,7 +121,7 @@ def primitive_aux(spec, params, isband, error, outplot=None):
                 specband_.plot(fax=ax[1][1], show=False)
         plt.tight_layout()
         # Saving figure
-        if outplot is not 'show':
+        if outplot != 'show':
             plt.savefig('{0}/{1}.png'.format(outplot, spec.label))
         else:
             plt.show()

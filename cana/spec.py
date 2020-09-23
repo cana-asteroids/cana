@@ -1,13 +1,14 @@
 r"""Tools to handle asteroid spectra."""
 
 from os.path import splitext, basename
-import numpy as np
+from dataclasses import dataclass, field
 from scipy.interpolate import UnivariateSpline
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
-from dataclasses import dataclass, field
+import numpy as np
+
 
 import matplotlib.pyplot as plt
 import matplotlib
@@ -21,7 +22,7 @@ from .specdata import SpectralData
 def loadspec(filename, unit='micron', r_error_col=None,
              masknull=True, label=None, **kwargs):
     r"""
-    Loads a spectrum file in units of *unit*. Returns a new Spectrum object
+    Load a spectrum file in units of *unit*. Returns a new Spectrum object.
 
     Parameters
     ----------
@@ -59,7 +60,7 @@ def loadspec(filename, unit='micron', r_error_col=None,
 
     # masking zero values in the wavelength array
     if masknull:
-        mask      = np.argwhere(spec_data[0] == 0)
+        mask = np.argwhere(spec_data[0] == 0)
         spec_data = np.delete(spec_data, mask, axis=1)
 
     # inserting it in as a Spectrum object
@@ -71,7 +72,7 @@ def loadspec(filename, unit='micron', r_error_col=None,
         label = basename(splitext(filename)[0])
 
     # creating Spectrum object with given data
-    spec = Spectrum(w=spec_data[0], r=spec_data[1],
+    spec = Spectrum(spec_data[0], spec_data[1],
                     r_unc=r_error_col, unit=unit,
                     label=label)
     return spec
@@ -95,13 +96,14 @@ def stack_spec(tup):
 
     """
     wave = np.hstack([i.w for i in tup])
-    ref  = np.hstack([i.r for i in tup])
+    ref = np.hstack([i.r for i in tup])
 
-    stacked = Spectrum(w=wave, r=ref, r_unc=None, unit=tup[0].unit,
+    stacked = Spectrum(wave, ref, r_unc=None, unit=tup[0].unit,
                        label='_'.join(t.label for t in tup))
     stacked.sort(order='w')
 
     return stacked
+
 
 @dataclass(repr=False)
 class Spectrum(SpectralData):
@@ -151,6 +153,7 @@ class Spectrum(SpectralData):
     plot
 
     """
+
     w: np.ndarray
     r: np.ndarray
     r_unc: np.ndarray = field(default=None)
@@ -158,16 +161,17 @@ class Spectrum(SpectralData):
     unit: str = field(default='micron')
 
     def __post_init__(self):
+        r"""Inicialize class."""
         self.w = np.array(self.w, ndmin=1)
         self.r = np.array(self.r, ndmin=1)
         assert self.w.size == self.r.size
         if self.r_unc is None:
-            self.dtype = ('w','r')
+            dtype = ('w', 'r')
         else:
             self.r_unc = np.array(self.r_unc, ndmin=1)
             assert self.r_unc.size == self.r.size
-            self.dtype = ('w', 'r', 'r_unc')
-        SpectralData.__init__(self)
+            dtype = ('w', 'r', 'r_unc')
+        SpectralData.__init__(self, self.w, dtype, self.label, unit=self.unit)
 
     def angstrom2micron(self):
         r"""Convert wavenlength axis from angstrom to micron."""
@@ -180,31 +184,6 @@ class Spectrum(SpectralData):
         self.w = self.w * 10000.
         self.unit = 'angstrom'
         return self
-
-    def trim(self, w_min=0.55, w_max=0.85):
-        r"""
-        Trim the spectrum in a defined region.
-
-        Parameters
-        ----------
-        w_min: float
-            Wavelength lower limit
-
-        w_max: float
-            Wavelength upper limit
-
-        Returns
-        -------
-        self : Spectrum object
-            the trimmed spectrum.
-
-        """
-        aux = self[(self.w > w_min) & (self.w < w_max)]
-        r_unc = self.r_unc
-        if self.r_unc is not None:
-            r_unc = aux['r_unc']
-        return Spectrum(w=aux['w'], r=aux['r'], r_unc=r_unc, unit=self.unit,
-                        label=self.label + '_trimmed')
 
     def fit(self, order=4, ftype='spline'):
         r"""
@@ -264,7 +243,7 @@ class Spectrum(SpectralData):
         # degrees which we will test the fitting
         degrees = np.arange(degree_min, degree_max+1)
         # calculation cross-validation score and error for each degree
-        cross, err = np.array([self._autofit_aux(deg) for deg in degrees]).T
+        cross, _ = np.array([self._autofit_aux(deg) for deg in degrees]).T
         # getting minimun cross validation score
         aux = np.argmin(cross)
         bestfit = degrees[aux]
@@ -345,9 +324,10 @@ class Spectrum(SpectralData):
             fspec, _ = self.autofit()
         else:
             fspec, _ = self.fit(order=fit, ftype='polynomial')
-        cspec = np.divide(self.r, fspec.r)
-        cspec_index = [self._sigma_clip(val, sigma=sigma, cspec=cspec)
-                       for val in cspec]
+        if method == 'sigmaclip':
+            cspec = np.divide(self.r, fspec.r)
+            cspec_index = [self._sigma_clip(val, sigma=sigma, cspec=cspec)
+                           for val in cspec]
         aux = self[cspec_index]
 
         spec = Spectrum(aux.w, aux.r, unit=self.unit,
@@ -356,7 +336,7 @@ class Spectrum(SpectralData):
 
     def _sigma_clip(self, val, sigma, cspec):
         r"""Auxiliary method to perform sigma-clipping on array elements."""
-        if (np.median(cspec) - self._mad(cspec)*sigma < val) and \
+        if (np.median(cspec) - self._mad(cspec) * sigma < val) and \
            (val < np.median(cspec) + self._mad(cspec)*sigma):
             return True
         return False
@@ -436,7 +416,7 @@ class Spectrum(SpectralData):
         else:
             std = None
         return Spectrum(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
-                        label=self.label + '_binned' )
+                        label=self.label + '_binned')
 
     def normalize(self, wnorm=0.55, window=None, interpolate=False):
         r"""
@@ -489,7 +469,7 @@ class Spectrum(SpectralData):
             The Spectrum array without the masked region
 
         """
-        if isinstance(region[0], float) or isinstance(region[0], int):
+        if isinstance(region[0], (float, int)):
             masked_spec = self.mask_region_aux(self, wmin=region[0],
                                                wmax=region[1])
         else:
@@ -566,7 +546,6 @@ class Spectrum(SpectralData):
         """
         np.savetxt(fname, self, fmt=fmt, delimiter=delimiter, header=header,
                    footer=footer, comments=comments, encoding=encoding)
-        self.path = fname
 
     def plot(self, fax=None, show=False, savefig=None,
              axistitles=True, speckwargs=None, legendkwargs=None):
