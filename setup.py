@@ -41,7 +41,8 @@ INSTALL_REQUIRES = [
     'pandas',
     'scipy',
     'sklearn',
-    'matplotlib'
+    'matplotlib',
+    'dataclasses'
 ]
 
 PYTHON_REQUIRES = ">=3.6"
