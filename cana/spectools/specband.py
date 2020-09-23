@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from .uncertainties import SpecError
-from .. import loadspec, Spectrum
+from .. import loadspec, Spectrum, stack_spec
 from ..util import kwargupdate, find_nearest, Parameter
 
 
@@ -152,9 +152,9 @@ class Continuum(object):
 
         """
         # Trimming the continum region
-        lower_cont = spec.T[(spec.w < spec.w.min()+self.lowerwindow)].T
-        upper_cont = spec.T[(spec.w > spec.w.max()-self.upperwindow)].T
-        cont_region = np.hstack([lower_cont, upper_cont])
+        lower_cont = spec[(spec.w < spec.w.min()+self.lowerwindow)]
+        upper_cont = spec[(spec.w > spec.w.max()-self.upperwindow)]
+        cont_region = stack_spec([lower_cont, upper_cont])
         self.bcoefs = np.polyfit(cont_region['w'], cont_region['r'], 1)
         cont_y = np.polyval(self.bcoefs, spec.w)
         self.cont_arr = np.array([spec.w, cont_y])

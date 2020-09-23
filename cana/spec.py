@@ -7,10 +7,12 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
+from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
 import matplotlib
 from .util import find_nearest, kwargupdate
+from .specdata import SpectralData
 # Omiting the warning for bad polynomial fitting
 # import warnings
 # warnings.simplefilter('ignore', np.RankWarning)
@@ -71,7 +73,7 @@ def loadspec(filename, unit='micron', r_error_col=None,
     # creating Spectrum object with given data
     spec = Spectrum(w=spec_data[0], r=spec_data[1],
                     r_unc=r_error_col, unit=unit,
-                    path=filename, label=label)
+                    label=label)
     return spec
 
 
@@ -92,17 +94,17 @@ def stack_spec(tup):
         wavelength.
 
     """
-    wave = np.hstack((i.w for i in tup))
-    ref  = np.hstack((i.r for i in tup))
+    wave = np.hstack([i.w for i in tup])
+    ref  = np.hstack([i.r for i in tup])
 
     stacked = Spectrum(w=wave, r=ref, r_unc=None, unit=tup[0].unit,
-                    path=None, label=tup[0].label)
+                       label='_'.join(t.label for t in tup))
     stacked.sort(order='w')
 
     return stacked
 
-
-class Spectrum(np.recarray):
+@dataclass(repr=False)
+class Spectrum(SpectralData):
     r"""Create a spectrum object.
 
         A spectrum array is a subclass of a record or structured numpy array,
@@ -149,56 +151,33 @@ class Spectrum(np.recarray):
     plot
 
     """
+    w: np.ndarray
+    r: np.ndarray
+    r_unc: np.ndarray = field(default=None)
+    label: str = field(default='asteroid')
+    unit: str = field(default='micron')
 
-    def __new__(cls, w, r, unit='micron', r_unc=None, path=None, label=None):
-        r"""Generate Spectrum object."""
-        # Asserting Spectrum is well structured
-        assert len(w) == len(r)
-        assert unit.lower() in ['micron', 'angstrom'], \
-            'unit should be microns or angstroms'
-        # Creating Spectrum
-        dt_list = [('w', 'float'), ('r', 'float')]
-        arr_list = [w, r]
-        if (type(r_unc) is np.ndarray) and (r_unc.size == r.size):
-            assert len(r) == len(r_unc)
-            dt_list.append(('r_unc', 'float'))
-            arr_list.append(r_unc)
-        dt = np.dtype(dt_list)
-        buffer = np.array(list(zip(*arr_list)), dtype=dt)
-        obj = super(Spectrum, cls).__new__(cls, buffer.shape, dtype=dt)
-        obj.w = buffer['w']
-        obj.r = buffer['r']
-        if r_unc is not None:
-            obj.r_unc = buffer['r_unc']
-        obj = obj.view(Spectrum)
-        obj.unit = unit.lower()
-        obj.res = len(obj.w)
-        obj.path = path
-        obj.label = label
-        if r_unc is None:
-            obj.r_unc = r_unc
-        return obj
-
-    def __array_finalize__(self, obj, context=None):
-        if obj is None:
-            return
-        self.info = getattr(obj, 'info', None)
-
-    def __array_prepare__(self, out_arr, context=None):
-        return np.ndarray.__array_prepare__(self, out_arr, context)
-
-    def __array_wrap__(self, out_arr, context=None):
-        return np.ndarray.__array_wrap__(self, out_arr, context)
+    def __post_init__(self):
+        self.w = np.array(self.w, ndmin=1)
+        self.r = np.array(self.r, ndmin=1)
+        assert self.w.size == self.r.size
+        if self.r_unc is None:
+            self.dtype = ('w','r')
+        else:
+            self.r_unc = np.array(self.r_unc, ndmin=1)
+            assert self.r_unc.size == self.r.size
+            self.dtype = ('w', 'r', 'r_unc')
+        SpectralData.__init__(self)
 
     def angstrom2micron(self):
         r"""Convert wavenlength axis from angstrom to micron."""
-        self.w = self.w/10000.0
+        self.w = self.w / 10000.0
         self.unit = 'micron'
         return self
 
     def micron2angstrom(self):
         r"""Convert wavenlength axis from micron to angstrom."""
-        self.w = self.w*10000.
+        self.w = self.w * 10000.
         self.unit = 'angstrom'
         return self
 
@@ -225,7 +204,7 @@ class Spectrum(np.recarray):
         if self.r_unc is not None:
             r_unc = aux['r_unc']
         return Spectrum(w=aux['w'], r=aux['r'], r_unc=r_unc, unit=self.unit,
-                        path=self.path, label=self.label)
+                        label=self.label + '_trimmed')
 
     def fit(self, order=4, ftype='spline'):
         r"""
@@ -259,7 +238,7 @@ class Spectrum(np.recarray):
         y_err = np.abs(fspec_y - self.r)
         # building new array
         fspec = Spectrum(w=self.w, r=fspec_y, r_unc=y_err, unit=self.unit,
-                         path=self.path, label=self.label)
+                         label=self.label + '_fit')
         return fspec, fcoefs
 
     def autofit(self, degree_min=1, degree_max=12):
@@ -372,7 +351,7 @@ class Spectrum(np.recarray):
         aux = self[cspec_index]
 
         spec = Spectrum(aux.w, aux.r, unit=self.unit,
-                        path=self.path, label=self.label)
+                        label=self.label + '_cleaned')
         return spec
 
     def _sigma_clip(self, val, sigma, cspec):
@@ -457,7 +436,7 @@ class Spectrum(np.recarray):
         else:
             std = None
         return Spectrum(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
-                        path=self.path, label=self.label)
+                        label=self.label + '_binned' )
 
     def normalize(self, wnorm=0.55, window=None, interpolate=False):
         r"""
@@ -548,7 +527,7 @@ class Spectrum(np.recarray):
         if r_unc is not None:
             r_unc = spec.r_unc[mask]
         return Spectrum(w=w, r=r, r_unc=r_unc, unit=spec.unit,
-                        path=spec.path, label=spec.label)
+                        label=spec.label)
 
     def save(self, fname, fmt='%.5f', delimiter=' ', header='', footer='',
              comments='#', encoding=None):
