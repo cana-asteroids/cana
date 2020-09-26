@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from .util import find_nearest, kwargupdate
 from .specdata import SpectralData
+
 # Omiting the warning for bad polynomial fitting
 # import warnings
 # warnings.simplefilter('ignore', np.RankWarning)
@@ -54,23 +55,18 @@ def loadspec(filename, unit='micron', r_error_col=None,
     for k in default_kwargs:
         if k not in kwargs:
             kwargs[k] = default_kwargs[k]
-
     # Loading the file using numpy.loadtxt
     spec_data = np.loadtxt(filename, **kwargs)
-
     # masking zero values in the wavelength array
     if masknull:
         mask = np.argwhere(spec_data[0] == 0)
         spec_data = np.delete(spec_data, mask, axis=1)
-
     # inserting it in as a Spectrum object
     if r_error_col is not None:
         r_error_col = spec_data[r_error_col]
-
     # setting the label
     if label is None:
         label = basename(splitext(filename)[0])
-
     # creating Spectrum object with given data
     spec = Spectrum(spec_data[0], spec_data[1],
                     r_unc=r_error_col, unit=unit,
@@ -97,11 +93,14 @@ def stack_spec(tup):
     """
     wave = np.hstack([i.w for i in tup])
     ref = np.hstack([i.r for i in tup])
-
-    stacked = Spectrum(wave, ref, r_unc=None, unit=tup[0].unit,
+    r_unc_aux = [type(i.r_unc) for i in tup]
+    if type(None) not in r_unc_aux:
+        r_unc = np.hstack([i.r_unc for i in tup])
+    else:
+        r_unc = None
+    stacked = Spectrum(wave, ref, r_unc=r_unc, unit=tup[0].unit,
                        label='_'.join(t.label for t in tup))
-    stacked.sort(order='w')
-
+    stacked = stacked.sort(order='w')
     return stacked
 
 
@@ -586,13 +585,13 @@ class Spectrum(SpectralData):
             fig = plt.figure()
             fax = fig.gca()
         # setting default values for image plot with matplotlib
-        specsty_defaults = {'c': '0.1', 'lw': '1'}
+        specsty_defaults = {'c': '0.1', 'lw': 1}
         legendsty_defaults = {'loc': 'best'}
         # updating plot styles
         speckwargs = kwargupdate(specsty_defaults, speckwargs)
         legendkwargs = kwargupdate(legendsty_defaults, legendkwargs)
         # Ploting the spec
-        fax.plot(self.w, self.r, **speckwargs)
+        fax.errorbar(self.w, self.r, yerr=self.r_unc, **speckwargs)
         # Checking if desired to plot the axis labels
         if axistitles:
             fax.set_xlabel('Wavelength (%s)' % self.unit)

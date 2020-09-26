@@ -1,8 +1,29 @@
 r"""Utility functions."""
 
+from textwrap import dedent
+from scipy.stats import truncnorm
 import numpy as np
 import pandas as pd
 from scipy.interpolate import UnivariateSpline
+
+
+def verboseprint(text, underline=False, bold=False):
+    r"""Adjust the style of the print."""
+    text = text.splitlines()
+    for line in text:
+        print(line.strip())
+        if underline:
+            print('-'*len(line))
+        # text = PrintStyle.UNDERLINE+text+PrintStyle.UNDERLINE
+    # if bold:
+        # text = PrintStyle.BOLD+text+PrintStyle.BOLD
+    # print(text)
+
+
+def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
+    r"""Return truncaded normal."""
+    norm = truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
+    return norm
 
 
 def find_nearest(array, value):

@@ -25,7 +25,7 @@ class SpectralData:
         self.w = w
         self.label = label
         self.dtype = dtype
-        self.repr = self.make_repr()
+        # self.repr = self.make_repr()
         self.kwargs = kwargs
 
     def __getitem__(self, item):
@@ -67,7 +67,7 @@ class SpectralData:
 
     def __repr__(self):
         r"""Representation of a Spectral Data."""
-        return self.repr
+        return self.make_repr()
 
     @property
     def shape(self):
@@ -110,17 +110,14 @@ class SpectralData:
         return self.__class__(*args, label=self.label, **self.kwargs)
 
     def rebase(self, baseaxis):
-        r"""Interpolate the Spectral Data to a new wavelentgh axis.
+        r"""Interpolate spectra to a new axis.
 
         Parameters
         ----------
-        basename: array
-            New wavelength array
-
-        Returns
-        -------
-        The interpolated object
-
+        baseaxis: np.array
+            The new wavelength axis for the Spectrum
         """
         args = [np.interp(baseaxis, self.w, self[d]) for d in self.dtype[1:]]
-        return self.__class__(*args, label=self.label, **self.kwargs)
+        new = self.__class__(baseaxis, *args, label=self.label,
+                             **self.kwargs)
+        return new
