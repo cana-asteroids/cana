@@ -6,3 +6,5 @@ scipy
 pandas
 sklearn
 matplotlib
+numba
+dataclass
