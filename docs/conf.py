@@ -72,13 +72,15 @@ autosummary_generate = True
 autodoc_default_flags = ['members']
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+source_suffix = '.rst'
+pygments_style = 'sphinx'
 # The master toctree document.
 master_doc = 'index'
 
@@ -101,7 +103,8 @@ html_theme_options = {
                      ("Cookbook", "gallery/index"),
                      ("Docs", "docs"),
                      ("Contribute", "contribute"),
-                     ("Cite", "cite")],
+                     ("Cite", "cite"),
+                     ("Code", "https://github.com/depra/cana", 1)],
     # Render the next and previous page links in navbar. (Default: true)
     'navbar_sidebarrel': False,
     # Render the current pages TOC in the navbar. (Default: true)
@@ -110,7 +113,7 @@ html_theme_options = {
     'navbar_pagenav_name': "This page",
     # Global TOC depth for "site" navbar tab. (Default: 1)
     # Switching to -1 shows all levels.
-    'globaltoc_depth': 1,
+    'globaltoc_depth': 2,
     # Include hidden TOCs in Site navbar?
     # Note: If this is "false", you cannot have mixed ``:hidden:`` and
     # non-hidden ``toctree`` directives in the same page, or else the build
@@ -129,11 +132,16 @@ html_theme_options = {
     'bootstrap_version': "3",
 
 }
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_use_modindex = True
+html_sidebars = {'gallery/index': ['localtoc.html', 'searchbox.html'],
+                 'api/index': ['localtoc.html', 'searchbox.html'],
+                 'api/generated/*': ['localtoc.html', 'relations.html', 'searchbox.html']}
 
 html_css_files = [
     '"style.css',

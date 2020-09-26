@@ -14,7 +14,7 @@ Spectroscopy
    :toctree: generated/
 
     spec
-    
+
     util
 
 Spectools
@@ -27,6 +27,3 @@ Spectools
     spectools.taxonomytool
     spectools.specband
     spectools.uncertainties
-
-
-.. toctree::
