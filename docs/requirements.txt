@@ -7,4 +7,4 @@ pandas
 sklearn
 matplotlib
 numba
-dataclass
+dataclasses
