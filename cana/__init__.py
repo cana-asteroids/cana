@@ -9,4 +9,4 @@ from .photo import PhotoDataframe
 from .convolution import convolution, interp_spec
 from . import datasets
 from .composition import OpticalConstant, read_constant, Shkuratov, \
-                         IntimateMixture, RandomSearch
+                         IntimateMixture, RandomSearch, read_constant_batch
