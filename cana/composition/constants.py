@@ -29,13 +29,48 @@ def read_constant(filename, label=None, **kwargs):
     Sample
 
     """
-    data = np.loadtxt(filename, dtype=[('w', np.float64),
-                                       ('n', np.float64),
-                                       ('k', np.float64)],
-                      usecols=(0, 1, 2), **kwargs)
+    if isinstance(filename, str):
+        data = np.loadtxt(filename, dtype=[('w', np.float64),
+                                           ('n', np.float64),
+                                           ('k', np.float64)],
+                          usecols=(0, 1, 2), **kwargs)
+    elif isinstance(filename, np.ndarray):
+        data = filename
     if label is None:
-        label = os.path.basename(filename)
+        if isinstance(filename, str):
+            label = os.path.basename(filename)
+        else:
+            label = 'sdoc-constant'
     return OpticalConstant(data['w'], data['n'], data['k'], label=label)
+
+
+def read_constant_batch(filelist, labels=None, **kwargs):
+    r"""Read optical constant file.
+
+    The data should have 3 columns in the format: wavelength, n, k
+
+    Parameters
+    ----------
+    filename: string
+        The path for the optical constant file
+
+    label: string (optional)
+        A label to used to identify the optical constant. If None will use the
+        file basename as label. Default is None
+
+    grainsize: float (optional)
+
+
+    Returns
+    -------
+    Sample
+
+    """
+    if labels is None:
+        out = [read_constant(f, label=None, **kwargs) for i, f in enumerate(filelist)]
+    else:
+        out = [read_constant(f, label=labels[i], **kwargs) for i, f in enumerate(filelist)]
+    return out
 
 
 @dataclass(repr=False)
@@ -63,13 +98,13 @@ class OpticalConstant(SpectralData):
         _, ax1 = plt.subplots()
         ax1.set_xlabel('Wavelength (microns)', fontsize=14)
 
-        ax1.plot(self.w, self.n, label='Real', color='steelblue', lw=2)
-        ax1.tick_params(axis='y', labelcolor='steelblue')
-        ax1.set_ylabel('Refractive Index (n)', color='steelblue', fontsize=14)
+        ax1.plot(self.w, self.n, label='Real', color='teal', lw=2)
+        ax1.tick_params(axis='y', labelcolor='teal')
+        ax1.set_ylabel('Refractive Index (n)', color='teal', fontsize=14)
 
         ax2 = ax1.twinx()
         ax2.plot(self.w, self.k, label='Imaginary', color='firebrick', lw=2)
         ax2.tick_params(axis='y', labelcolor='firebrick')
-        ax2.set_ylabel('Extinction coefficient k (imaginary)',
+        ax2.set_ylabel('Extinction coefficient (k)',
                        color='firebrick', fontsize=14)
         plt.show()

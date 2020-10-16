@@ -59,7 +59,7 @@ class IntimateMixture(object):
             model = Shkuratov
         return model
 
-    def make(self, albedo_w=0.55, baseaxis=None,
+    def make(self, albedo_w=0.55, wavelengths=None,
              datatype=None):
         r"""Make the reflectance spectrum of the mixture.
 
@@ -79,16 +79,16 @@ class IntimateMixture(object):
             of the first sample as a reference. Not used if rebase=False.
 
         """
-        if baseaxis is None:
-            baseaxis = self.samples[0].w
+        if wavelengths is None:
+            wavelengths = self.samples[0].w
         # building coef structure
-        coef = np.zeros(len(baseaxis),
+        coef = np.zeros(len(wavelengths),
                         dtype=[('b', np.float64), ('f', np.float64)])
         # calculating coeficients
         for s, sam in enumerate(self.samples):
             # no need to calculate coeficients if proportion is zero
             if self.proportions[s] != 0.:
-                sam = sam.rebase(baseaxis=baseaxis)
+                sam = sam.rebase(baseaxis=wavelengths)
                 model = self.model(sample=sam, grainsize=self.grainsizes[s],
                                    porosity=self.porosity)
                 coef_aux = model.scattering_coef()
@@ -97,5 +97,5 @@ class IntimateMixture(object):
                 coef['f'] += coef_aux['f']*self.proportions[s]
         spec, albedo = model.build_spec(coef=coef,
                                         albedo_w=albedo_w)
-        spec = interp_spec(spec, baseaxis=baseaxis, datatype=datatype)
+        spec = interp_spec(spec, baseaxis=wavelengths, datatype=datatype)
         return spec, albedo

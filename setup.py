@@ -23,9 +23,8 @@ LICENSE = 'MIT License'
 PACKAGES = ['cana',
             'cana.spectools',
             'cana.pipelines',
-#            'cana.taxutils',
-            'cana.datasets']
-#            'cana.errormodels',
+            'cana.datasets',
+            'cana.composition']
 #            'cana.pipelines']
 
 PACKAGE_DATA = {
@@ -42,7 +41,8 @@ INSTALL_REQUIRES = [
     'scipy',
     'sklearn',
     'matplotlib',
-    'dataclasses'
+    'dataclasses',
+    'numba'
 ]
 
 PYTHON_REQUIRES = ">=3.6"

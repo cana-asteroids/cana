@@ -257,7 +257,7 @@ class Taxonomy(object):
 
         return spec_reflectances, tax_comparable
 
-    def plot_class(self, tclass, tax2comp=None, fax=None, axistitles=True,
+    def plot_class(self, tclass, region=None, tax2comp=None, fax=None, axistitles=True,
                    show=True, legendkwargs=None, taxkwargs=None):
         r"""
         Plot taxonomic class templates.
@@ -279,10 +279,17 @@ class Taxonomy(object):
                      label=tclass, **taxkwargs)
         else:
             for t in tclass:
-                fax.plot(tax2comp['wavelength'],
-                         tax2comp[t],
-                         label=t, **taxkwargs)
-        # else ---> implement! view all classes
+                if region is not None:
+                    aux = np.where((tax2comp['wavelength']>=region[0]) &
+                                 (tax2comp['wavelength']<=region[1]))
+                    fax.plot(tax2comp['wavelength'][aux],
+                             tax2comp[t][aux],
+                             label=t, **taxkwargs)
+                else:
+                    fax.plot(tax2comp['wavelength'],
+                             tax2comp[t],
+                             label=t, **taxkwargs)
+            # else ---> implement! view all classes
         fax.legend(**legendkwargs)
         if axistitles:
             plt.xlabel('Wavelength')

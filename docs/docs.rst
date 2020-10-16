@@ -9,7 +9,7 @@ Documentation (version |version|)
         <div class="col-md-6">
             <h3><a href="install.html">Installing</a></h3>
             <em>
-            Instructions to setup Cana and its dependencies.
+            Instructions to setup <code class="docutils literal">cana</code> and its dependencies.
             </em>
         </div>
         <div class="col-md-6">
@@ -28,7 +28,7 @@ Documentation (version |version|)
             <em>
             Beginner recipes to get started
             </em>
-        </div> 
+        </div>
        <div class="col-md-6">
             <h3><a href="api/index.html">API Reference</a></h3>
             <em>

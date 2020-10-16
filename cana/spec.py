@@ -417,7 +417,7 @@ class Spectrum(SpectralData):
         return Spectrum(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
                         label=self.label + '_binned')
 
-    def normalize(self, wnorm=0.55, window=None, interpolate=False):
+    def normalize(self, wnorm=0.55, window=None, interpolate=True):
         r"""
         Normalize the spectrum in a particular wavelength.
 
@@ -442,8 +442,14 @@ class Spectrum(SpectralData):
 
         """
         if window is None:
-            aux = find_nearest(self.w, wnorm)[0]
-            self.r = self.r / self.r[aux]
+            if not interpolate:
+                aux = find_nearest(self.w, wnorm)[0]
+                norm_factor = self.r[aux]
+            else:
+                norm_factor = np.interp(wnorm, self.w, self.r)
+            self.r = self.r / norm_factor
+            if self.r_unc is not None:
+                self.r_unc = self.r_unc / norm_factor
         else:
             aux = np.argwhere((self.w > wnorm-window) &
                               (self.w < wnorm+window))
@@ -508,43 +514,6 @@ class Spectrum(SpectralData):
         return Spectrum(w=w, r=r, r_unc=r_unc, unit=spec.unit,
                         label=spec.label)
 
-    def save(self, fname, fmt='%.5f', delimiter=' ', header='', footer='',
-             comments='#', encoding=None):
-        r"""
-        Save the spectrum data into file.
-
-        Parameters
-        ----------
-        fname : filename or file handle
-            If the filename ends in .gz, the file is automatically saved in
-            compressed gzip format.
-            loadspec understands gzipped files transparently.
-
-        fmt : str or sequence of strs, optional
-
-        delimiter : str, optional
-            String or character separating columns.
-
-        newline : str, optional
-            String or character separating lines.
-
-        header : str, optional
-            String that will be written at the beginning of the file.
-
-        footer : str, optional
-            String that will be written at the end of the file.
-
-        comments : str, optional
-            String that will be prepended to the header and footer strings,
-            to mark them as comments.
-
-        encoding : {None, str}, optional
-            Encoding used to encode the outputfile. Does not apply to output
-            streams.
-
-        """
-        np.savetxt(fname, self, fmt=fmt, delimiter=delimiter, header=header,
-                   footer=footer, comments=comments, encoding=encoding)
 
     def plot(self, fax=None, show=False, savefig=None,
              axistitles=True, speckwargs=None, legendkwargs=None):

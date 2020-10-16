@@ -27,3 +27,16 @@ Spectools
     spectools.taxonomytool
     spectools.specband
     spectools.uncertainties
+
+
+Composition
+-----------
+
+.. autosummary::
+   :toctree: generated/
+
+    composition.core
+    composition.constants
+    composition.shkuratov
+    composition.mixtures
+    composition.randomsearch

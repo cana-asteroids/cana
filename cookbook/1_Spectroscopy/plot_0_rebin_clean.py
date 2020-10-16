@@ -1,6 +1,6 @@
 """
-Rebining and cleaning the spectrum from bad points
---------------------------------------------------
+Rebin and clean a spectrum
+--------------------------
 """
 
 import matplotlib.pyplot as plt

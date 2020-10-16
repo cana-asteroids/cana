@@ -287,7 +287,7 @@ class Photometry(PhotometryBase):
             for nid, nam in enumerate(self.transmission_curves.dtype.names[1:]):
                 linestyle['c'] = cmap(color_aux[nid])
                 fax.plot(self.transmission_curves['w'], self.transmission_curves[nam],
-                        label=nam, **linestyle)
+                         label=nam, **linestyle)
         else:
             pass #-> make gaussian based on available info
         if legend:
@@ -366,7 +366,7 @@ class PhotoDataframe(pd.DataFrame, PhotometryBase):
                             for mid in mid_aux:
                                 data = np.insert(data, mid, 0, axis=1)
                     super(PhotoDataframe, self).__init__(data=data,
-                                                    index=index,
+                                                     index=index,
                                                     columns=cols,
                                                     copy=copy)
                 else:

@@ -1,0 +1,4 @@
+.. _composition:
+
+Compositional Model
+-------------------

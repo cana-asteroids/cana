@@ -3,7 +3,6 @@
 Cookbook
 ========
 
-See below some basic usage examples:
+See below some basic usage examples.
 
-Spectroscopy
-------------
+For a (nearly) complete reference of cana methods and classes check the `API <../api/index.html>`_. 

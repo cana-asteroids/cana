@@ -15,7 +15,7 @@ class BaseCompositionalModel(object):
     def __init__(self, samples, grainsizes=[30, 50],
                  proportions=[0, 1], porosity=0.5,
                  mixtype='intimate',
-                 model='shkuratov', metric='chisquare'):
+                 model='shkuratov', metric='chi2-error'):
         r"""Initialize Compositional model.
 
         Parameters
@@ -69,10 +69,12 @@ class BaseCompositionalModel(object):
 
     def fitness_method(self, method_name):
         r"""Set the method to evaluate the fitness."""
-        if method_name == 'chisquare':
-            method = self.chi2
-        if method_name == 'weighted-chisquare':
+        if method_name == 'chi2-error':
+            method = self.chi2_error
+        if method_name == 'weighted-chi2-error':
             method = self.weighted_chi2
+        if method_name == 'chi2':
+            method = self.chisquare
         return method
 
     @staticmethod
@@ -82,10 +84,21 @@ class BaseCompositionalModel(object):
             mix = IntimateMixture
         return mix
 
-    def chi2(self, spec, mspec):
-        r"""Calculate the Reduced chi-square."""
+    def chi2_error(self, spec, mspec):
+        r"""Calculate the Reduced chi-square.
+
+        In this case the spec have errorbars."""
         res_aux = (spec.r - mspec.r)**2
         res = np.sum(res_aux/spec.r_unc**2) / (2*len(self.samples))
+        # print(res_aux)
+        # calculating p-value
+        pte = 1 - chi2.cdf(res, len(spec.w)-2*len(self.samples))
+        return res, pte
+
+    def chisquare(self, spec, mspec):
+        r"""Calculate the Reduced chi-square."""
+        res_aux = (spec.r - mspec.r)**2
+        res = np.sum(res_aux) / (2*len(self.samples))
         # calculating p-value
         pte = 1 - chi2.cdf(res, len(spec.w)-2*len(self.samples))
         return res, pte
@@ -115,7 +128,7 @@ class BaseCompositionalModel(object):
             weight_arr[aux] = np.array([weigths[i]/weight_sum for _ in range(len(aux))])
         weight_arr = (weight_arr / np.sum(weight_arr))*len(mspec.w)
         res_aux = ((spec.r - mspec.r)**2) * weight_arr
-        res = np.sum(res_aux/spec.r_unc**2) / (2*len(self.samples))
+        res = np.sum(res_aux/(spec.r_unc**2)) / (2*len(self.samples))
         pte = chi2.sf(res, len(spec.w)-2*len(self.samples)-1)
         return res, pte
 
@@ -152,16 +165,17 @@ class ModelOutput(object):
         self.normalize_spec = normalize_spec
         self.model = model
         # building DataFrame
-        self.table = self.build_dataframe(model.samples_ids)
+        self.allmixes = self.build_allmixes_dataframe(model.samples_ids)
         # placeholders
         self.bestmix = -1
         self.bestalbedo = -1
         self.bestscore = -1
         self.bestspec = -1
-        self.valid = -1
+        self.valid_mixes = -1
+        self.result = -1
 
     @staticmethod
-    def build_dataframe(samples, albedo=True):
+    def build_allmixes_dataframe(samples, albedo=True):
         r"""Build empty dataframe to vizualize evaluated mixtures."""
         columns = samples.copy()
         grain_aux = [sam+'_grain' for sam in samples]
@@ -173,30 +187,46 @@ class ModelOutput(object):
         out = pd.DataFrame(columns=columns)
         return out
 
-    def make_spec(self, baseaxis=None):
+    def build_result(self):
+        r"""
+        """
+        result = self.valid_mixes.describe()
+        result.loc['Bestfit'] = self.allmixes.iloc[0]
+        result = result.drop(['count', '25%', '50%', '75%'])
+        result = result.drop(['score', 'iter', 'p-value'], axis=1)
+        self.result = result
+        return result
+
+    def __repr__(self):
+        if not isinstance(self.result, pd.DataFrame):
+            repr_aux = 'Model have not yet produced results'
+        else:
+            repr_aux = self.result.T.__repr__()
+        return repr_aux
+
+    def make_spec(self, wavelengths=None):
         r"""Make the spectrum of the bestfit model."""
-        if baseaxis == None:
-            baseaxis = self.spec.w
-        spec, albedo = self.bestmix.make(baseaxis=baseaxis)
+        if wavelengths is None:
+            wavelengths = self.spec.w
+        spec, albedo = self.bestmix.make(wavelengths=wavelengths)
         if self.normalize_spec:
             spec = spec.normalize(self.wnorm)
         return spec, albedo
 
     def set_bestfit(self, index=None):
         r"""Set which is the bestfit."""
-        if not self.sorted:
-            self.sort()
+        self.sort_mixes()
         if index is None:
-            best = self.table.iloc[0]
+            best = self.allmixes.iloc[0]
             index = best.name
         self.bestmix = self.mixfromindex(index=index)
         self.bestspec, self.bestalbedo = self.make_spec()
-        self.bestscore = self.table.loc[index, 'score']
+        self.bestscore = self.allmixes.loc[index, 'score']
         return self
 
     def mixfromindex(self, index=0):
         r"""Make the mixture from the results table."""
-        aux = self.table.loc[index]
+        aux = self.allmixes.loc[index]
         props = list(aux[[sam for sam in self.model.samples_ids]])
         grains = list(aux[[sam+'_grain' for sam in self.model.samples_ids]])
         samples = self.model.samples
@@ -206,7 +236,7 @@ class ModelOutput(object):
                                  model=self.model.refmodel)
         return mix
 
-    def sort(self, col='score'):
+    def sort_mixes(self, col='score'):
         r"""Sort the rows of results table.
 
         Parameters
@@ -216,15 +246,15 @@ class ModelOutput(object):
             Default is 'score'.
 
         """
-        self.table = self.table.sort_values(by=[col])
+        self.allmixes = self.allmixes.sort_values(by=[col])
         if self.albedo_lim is not None:
-            aux = self.table[(self.table['albedo'] >= self.albedo_lim[0]) &
-                             (self.table['albedo'] <= self.albedo_lim[1])]
+            aux = self.allmixes[(self.allmixes['albedo'] >= self.albedo_lim[0]) &
+                                (self.allmixes['albedo'] <= self.albedo_lim[1])]
             aux2 = list(aux.index)
-            aux3 = [i for i, v in self.table.iterrows() if i not in aux2]
+            aux3 = [i for i, v in self.allmixes.iterrows() if i not in aux2]
             aux2.extend(aux3)
-            self.table = self.table.loc[aux2]
-        return self.table
+            self.allmixes = self.allmixes.loc[aux2]
+        return self.allmixes
 
     def select_valid(self, sigma=3):
         r"""Select valid models.
@@ -240,18 +270,13 @@ class ModelOutput(object):
             Valid models
         """
         if self.albedo_lim is not None:
-            valid = self.table[(self.table['albedo'] >= self.albedo_lim[0]) &
-                               (self.table['albedo'] <= self.albedo_lim[1])]
-        conf_value = 1-norm.pdf(sigma)
-        self.valid = valid[valid['p-value'] > conf_value]
-        return self.valid
+            valid = self.allmixes[(self.allmixes['albedo'] >= self.albedo_lim[0]) &
+                                  (self.allmixes['albedo'] <= self.albedo_lim[1])]
+        conf_value = 1 - 2*norm.sf(sigma)
+        self.valid_mixes = valid[valid['p-value'] > conf_value]
+        return self.valid_mixes
 
-    def __str__(self):
-        r"""
-        """
-        pass
-
-    def append(self, val, index=None):
+    def append_mix(self, val, index=None):
         r"""Append the mixture evaluation result to the table.
 
         Parameters
@@ -266,19 +291,15 @@ class ModelOutput(object):
 
         """
         if index is not None:
-            self.table.loc[index] = val
+            self.allmixes.loc[index] = val
         else:
-            aux = len(self.table)
-            self.table.loc[aux] = val
-        return self.table
+            aux = len(self.allmixes)
+            self.allmixes.loc[aux] = val
+        return self.allmixes
 
-    def __getattr__(self, name):
-        r"""
-        """
-
-    def plotbestfit(self, residual=True, fax=None, show=False, savefig=None,
-                    axistitles=True, speckwargs=None, mixwargs=None, reskwargs=None,
-                    legendkwargs=None):
+    def plot_bestfit_residual(self, fax=None, show=False, savefig=None,
+                              axistitles=True, speckwargs=None, mixwargs=None, reskwargs=None,
+                              legendkwargs=None):
         r"""Vizualize the bestfit."""
         # checking if plot in another frame
         if fax is None:
@@ -294,10 +315,9 @@ class ModelOutput(object):
                                        'label': 'bestfit'})
         fax1.legend()
         # Ploting residuals
-        if residual:
-            fax2 = fig.add_axes((.1, .1, .8, .2))
-            fax2.plot(self.spec.w, self.spec.r - self.bestspec.r)
-            fax2.set_ylabel('Residuals')
+        fax2 = fig.add_axes((.1, .1, .8, .2))
+        fax2.plot(self.spec.w, self.spec.r - self.bestspec.r)
+        fax2.set_ylabel('Residuals')
         # check if save the image
         if savefig is not None:
             plt.savefig(savefig)
@@ -308,30 +328,98 @@ class ModelOutput(object):
         if show:
             plt.show()
 
+
+    def plot_valid_proportions(self, savefig=None, show=True):
+        r"""
+        """
+        aux = self.valid_mixes[self.model.samples_ids]
+        aux.boxplot(rot=45)
+        # plt.savefig('varuna-spitizer-values.png')
+        plt.ylim(self.model.proportions[0], self.model.proportions[1])
+        if savefig is not None:
+            plt.savefig(savefig)
+            if not show:
+                plt.clf()
+            # matplotlib.use('TkAgg')
+            # show in the matplotlib window?
+        if show:
+            plt.show()
+
+    def plot_valid_models(self, savefig=None, show=True):
+        r"""
+        """
+        f, ax = plt.subplots()
+
+        for i, v in self.valid_mixes.iterrows():
+            b = self.mixfromindex(index=i)
+            sp, alb = self.make_spec()
+            sp.normalize(0.55)
+            ax.plot(sp.w, sp.r, lw=0.5, c='0.7')
+        ax.errorbar(self.spec.w, self.spec.r, yerr=self.spec.r_unc, zorder=1000000)
+
+        if savefig is not None:
+            plt.savefig(savefig)
+            if not show:
+                plt.clf()
+            # matplotlib.use('TkAgg')
+            # show in the matplotlib window?
+        if show:
+            plt.show()
+
     def plot_proportions(self, shape=[3,2],figsize=(10,15), step=1,
-                         fax=None, savefig=None, show=True):
+                         fax=None, sharex=True, savefig=None, show=True):
         r"""Vizualize the bestfit."""
         # checking if plot in another frame
         if fax is None:
-            _, ax = plt.subplots(*shape, figsize=figsize)
+            _, ax = plt.subplots(*shape, figsize=figsize, sharex=sharex)
             plt.tight_layout()
 
         ax = np.ravel(ax)
         for n, i in enumerate(self.model.samples_ids):
-            ax[n].scatter(self.table[i][::step],
-                          np.log10(self.table['score'][i][::step]),
+            ax[n].scatter(self.allmixes[i][::step],
+                          np.log10(self.allmixes['score'][::step]),
                           c='0.7', s=1, label=i)
-            ax[n].scatter(self.valid[i], np.log10(self.valid['score']),
+            ax[n].scatter(self.valid_mixes[i], np.log10(self.valid_mixes['score']),
                           c='b', s=1)
             ax[n].set_ylabel('score')
             ax[n].set_xlabel('proportion')
+            ax[n].legend()
             # ax[n].axhline(np.log10(aux['score'].max()))
 
         if savefig is not None:
             plt.savefig(savefig)
             if not show:
                 plt.clf()
-            matplotlib.use('TkAgg')
+            # matplotlib.use('TkAgg')
+            # show in the matplotlib window?
+        if show:
+            plt.show()
+
+    def plot_grains(self, shape=[3,2], figsize=(10,15), step=1,
+                    sharex=True, savefig=None, show=True):
+        r"""Vizualize the bestfit."""
+        # checking if plot in another frame
+        _, ax = plt.subplots(*shape, figsize=figsize, sharex=sharex)
+        plt.tight_layout()
+
+        ax = np.ravel(ax)
+        for n, i in enumerate(self.model.samples_ids):
+            ax[n].scatter(self.allmixes[i + '_grain'][::step],
+                          np.log10(self.allmixes['score'][::step]),
+                          c='0.7', s=1, label=i)
+            ax[n].scatter(self.valid_mixes[i + '_grain'],
+                          np.log10(self.valid_mixes['score']),
+                          c='b', s=1)
+            ax[n].set_ylabel('score')
+            ax[n].set_xlabel('grainsize')
+            ax[n].legend()
+            # ax[n].axhline(np.log10(aux['score'].max()))
+
+        if savefig is not None:
+            plt.savefig(savefig)
+            if not show:
+                plt.clf()
+            # matplotlib.use('TkAgg')
             # show in the matplotlib window?
         if show:
             plt.show()

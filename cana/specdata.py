@@ -121,3 +121,42 @@ class SpectralData:
         new = self.__class__(baseaxis, *args, label=self.label,
                              **self.kwargs)
         return new
+
+    def save(self, fname, fmt='%.5f', delimiter=' ', header='', footer='',
+             comments='#', encoding=None):
+        r"""
+        Save the spectrum data into file.
+
+        Parameters
+        ----------
+        fname : filename or file handle
+            If the filename ends in .gz, the file is automatically saved in
+            compressed gzip format.
+            loadspec understands gzipped files transparently.
+
+        fmt : str or sequence of strs, optional
+
+        delimiter : str, optional
+            String or character separating columns.
+
+        newline : str, optional
+            String or character separating lines.
+
+        header : str, optional
+            String that will be written at the beginning of the file.
+
+        footer : str, optional
+            String that will be written at the end of the file.
+
+        comments : str, optional
+            String that will be prepended to the header and footer strings,
+            to mark them as comments.
+
+        encoding : {None, str}, optional
+            Encoding used to encode the outputfile. Does not apply to output
+            streams.
+
+        """
+        arr = np.array([self[a] for a in self.dtype]).T
+        np.savetxt(fname, arr, fmt=fmt, delimiter=delimiter, header=header,
+                   footer=footer, comments=comments, encoding=encoding)

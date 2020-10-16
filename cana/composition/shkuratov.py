@@ -81,13 +81,15 @@ class Shkuratov(object):
             (1 - Ri * np.exp(-1 * tau))
         return rb, rf
 
-    def build_spec(self, coef=None, albedo_w=0.55):
+    def build_spec(self, coef=None, albedo_w=0.55, wavelengths=None):
         r"""Build the modeled spectra from the optical constants.
 
         Returns
         -------
         Spectrum, Geometric Albedo
         """
+        if wavelengths is not None:
+            self.sample = self.sample.rebase(wavelengths)
         if coef is None:
             coef = self.scattering_coef()
         # albedo indicatrix

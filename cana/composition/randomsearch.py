@@ -1,19 +1,20 @@
+r"""Random search to find best fit model."""
 
 import itertools
 import numpy as np
 from .core import BaseCompositionalModel, ModelOutput
 from ..util import verboseprint, get_truncated_normal
 from .. import interp_spec
-
+# import time
 
 class RandomSearch(BaseCompositionalModel):
     r"""Grid Model for compositional analysis."""
 
     def __init__(self, samples, grainsizes=[5, 200],
                  proportions=[0, 1], porosity=0.5,
-                 population=1000, alpha_scale=100,
+                 population=1000, alpha_scale=20,
                  niterations=5, nwalkers=4,
-                 verbose=2,
+                 verbose=2, initpopulation=None,
                  mixtype='intimate',
                  model='shkuratov', metric='weighted-chisquare'):
         r"""Initialize GridModel.
@@ -67,37 +68,43 @@ class RandomSearch(BaseCompositionalModel):
         self.nwalkers = nwalkers
         self.verbose = verbose
         self.alpha_scale = alpha_scale
+        if initpopulation is None:
+            self.initpopulation = population
+        else:
+            self.initpopulation = initpopulation
 
     def gen_initial_population(self):
         r"""Generate initial population."""
         # Creating parameters for initial population
         prop = np.random.dirichlet(np.ones(len(self.samples)) /
-                                   len(self.samples), size=self.population)
+                                   len(self.samples),
+                                   size=self.initpopulation)
         if self.grains.shape == (2,):
             grains = np.random.randint(self.grains[0], self.grains[1]+1,
-                                       size=(self.population, len(self.samples)))
+                                       size=(self.initpopulation,
+                                       len(self.samples)))
         else:
-            grains = np.zeros((self.population, len(self.samples)))
+            grains = np.zeros((self.initpopulation, len(self.samples)))
             for n, g in enumerate(self.grains):
                 grains[:, n] = np.random.randint(g[0], g[1]+1,
-                                                 size=self.population)
+                                                 size=self.initpopulation)
         # creating mixtures
-        for i in range(self.population):
+        for i in range(self.initpopulation):
             yield grains[i], prop[i]
 
     def gen_population_iter(self, base):
         r"""Generate population for the iteration."""
         prop_base = np.array(base.proportions)
         population = int(self.population/self.nwalkers)
-        aux = np.argwhere(prop_base < 0.1)
+        aux = np.argwhere(prop_base < 0.03)
         if len(aux) > 0:
-            prop_base[aux] = prop_base[aux]+0.1
+            prop_base[aux] = 0.03
         prop_base = prop_base * self.alpha_scale
         # print(prop_base)
         prop = np.random.dirichlet(prop_base, size=population)
         grains = np.zeros((population, len(self.samples)))
         for n, g in enumerate(self.grains):
-            gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/2,
+            gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/ 10, #2**(self.iter-1),
                                         low=g[0], upp=g[1]+1)
             grains[:, n] = gaux.rvs(population)
         for i in range(population):
@@ -110,7 +117,7 @@ class RandomSearch(BaseCompositionalModel):
             grid = self.gen_initial_population()
         else:
             # running iterations and walkers
-            aux = base.table.copy()
+            aux = base.allmixes.copy()
             aux2 = aux[self.samples_ids]
             aux2 = aux2.drop_duplicates()
             aux2 = aux2.iloc[:self.nwalkers]
@@ -118,8 +125,8 @@ class RandomSearch(BaseCompositionalModel):
             if self.verbose > 1:
                 verboseprint("Number of Walkers {0}".format(self.nwalkers))
             for _, i in enumerate(aux2.index):
-                base = base.set_bestfit(index=i)
-                mix = base.bestmix
+                # base = base.set_bestfit(index=i)
+                mix = base.mixfromindex(index=i)
                 grid_aux = self.gen_population_iter(mix)
                 grid.append(grid_aux)
             grid = itertools.chain(*grid)
@@ -131,13 +138,12 @@ class RandomSearch(BaseCompositionalModel):
             yield m_aux
 
     def model(self, spec, albedo_lim=None, albedo_w=0.55,
-              normalize_spec=True, wnorm=1.2, baseaxis=None,
-              sigma=3, datatype=None, **kwargs):
+              normalize_spec=True, wnorm=1.2, normvalue=0.127, wavelengths=None,
+              sigma=1, datatype=None, filterfunc=None, **kwargs):
         r"""Find the best fit to the spectrum.
 
         Parameters
         ----------
-
         baseaxis: None or array
             The wavelength array that will be used if rebase=True.
             If baseaxis=None it will select the wavelength
@@ -159,9 +165,12 @@ class RandomSearch(BaseCompositionalModel):
         result = ModelOutput(spec, albedo_lim,
                              normalize_spec=normalize_spec, wnorm=wnorm,
                              model=self)
-        if baseaxis is None:
-            baseaxis = spec.w
+        if wavelengths is None:
+            wavelengths = spec.w
+        # timeinit = time.time()
+        self.iter = -1
         for i in range(1, self.n+1):
+            # time1 = time.time()
             # printing info
             if self.verbose == 2:
                 verboseprint('Running Iteration: {0}'.format(i), underline=True)
@@ -176,11 +185,13 @@ class RandomSearch(BaseCompositionalModel):
             for _, mix in enumerate(mixtures):
                 if albedo_lim is not None:
                     mspec, malbedo = mix.make(albedo_w=albedo_w,
-                                              baseaxis=None)
-                    mspec = interp_spec(mspec, baseaxis, datatype)
+                                              wavelengths=None)
+                    mspec = interp_spec(mspec, wavelengths, datatype)
                 # normalizing
                 if normalize_spec:
                     mspec = mspec.normalize(wnorm)
+                    # if normvalue is not None:
+                    #     mspec.r = mspec.r*normvalue
                 # evaluate mixture
                 score, p_value = self.eval(spec, mspec, **kwargs)
                 # making output
@@ -190,24 +201,24 @@ class RandomSearch(BaseCompositionalModel):
                 if albedo_lim is not None:
                     out.append(malbedo)
                 out.extend([score, p_value, i])
-                result.append(out, index=None)
+                result.append_mix(out, index=None)
             # preparing for next iteration
-            result.sort()
-            result = result.set_bestfit()
-            result.select_valid(sigma)
-            if self.verbose == 2:
-                verboseprint("""\
-                             Best mixture with score {0}:
-                             {1}
-                             """.format(result.table.iloc[0]['score'],
-                                        result.bestmix.__str__()))
+            result.sort_mixes()
+            if filterfunc is not None:
+                result = filterfunc(result, spec)
+            self.iter = i
+            # timeend =  time.time()
+            # print("--- %s seconds ---" % (timeend - timeinit))
+            # print("--- %s seconds ---" % (timeend - time1))
+        result = result.set_bestfit()
+        result.select_valid(sigma)
+        result.build_result()
 
-            self.iter = iter
         if self.verbose >= 1:
             verboseprint("""\
                          Best mixture with score {0}:
                          {1}
-                         """.format(result.table.iloc[0]['score'],
+                         """.format(result.bestscore,
                                     result.bestmix.__str__()))
 
         return result

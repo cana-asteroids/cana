@@ -1,6 +1,6 @@
 """
-Calculating the center and depth of an absortium band
------------------------------------------------------
+Center and depth of an absortium band
+-------------------------------------
 """
 
 from cana.datasets import getspectrum

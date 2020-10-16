@@ -8,3 +8,5 @@ sklearn
 matplotlib
 numba
 dataclasses
+h5py
+cana-sdoc

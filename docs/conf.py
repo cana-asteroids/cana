@@ -104,6 +104,7 @@ html_theme_options = {
                      ("Docs", "docs"),
                      ("Contribute", "contribute"),
                      ("Cite", "cite"),
+                     ("SDOC", "sdoc"),
                      ("Code", "https://github.com/depra/cana", 1)],
     # Render the next and previous page links in navbar. (Default: true)
     'navbar_sidebarrel': False,
@@ -141,7 +142,8 @@ html_static_path = ['_static']
 html_use_modindex = True
 html_sidebars = {'gallery/index': ['localtoc.html', 'searchbox.html'],
                  'api/index': ['localtoc.html', 'searchbox.html'],
-                 'api/generated/*': ['localtoc.html', 'relations.html', 'searchbox.html']}
+                 'api/generated/*': ['localtoc.html'],
+                 'sdoc': ['localtoc.html']}
 
 html_css_files = [
     '"style.css',
