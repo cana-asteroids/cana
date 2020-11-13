@@ -88,10 +88,12 @@ class IntimateMixture(object):
         for s, sam in enumerate(self.samples):
             # no need to calculate coeficients if proportion is zero
             if self.proportions[s] != 0.:
+                # print(sam,self.proportions[s],self.grainsizes[s])
                 sam = sam.rebase(baseaxis=wavelengths)
                 model = self.model(sample=sam, grainsize=self.grainsizes[s],
                                    porosity=self.porosity)
                 coef_aux = model.scattering_coef()
+                # print(coef_aux)
                 # summing coeficients
                 coef['b'] += coef_aux['b']*self.proportions[s]
                 coef['f'] += coef_aux['f']*self.proportions[s]

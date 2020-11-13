@@ -92,23 +92,42 @@ class RandomSearch(BaseCompositionalModel):
         for i in range(self.initpopulation):
             yield grains[i], prop[i]
 
-    def gen_population_iter(self, base):
+    def gen_population_iter2(self, base):
         r"""Generate population for the iteration."""
         prop_base = np.array(base.proportions)
         population = int(self.population/self.nwalkers)
-        aux = np.argwhere(prop_base < 0.03)
+        aux = np.argwhere(prop_base < 0.05)
         if len(aux) > 0:
-            prop_base[aux] = 0.03
+            prop_base[aux] = 0.05
         prop_base = prop_base * self.alpha_scale
         # print(prop_base)
         prop = np.random.dirichlet(prop_base, size=population)
         grains = np.zeros((population, len(self.samples)))
         for n, g in enumerate(self.grains):
-            gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/ 10, #2**(self.iter-1),
+            gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/ 6, #2**(self.iter-1),
                                         low=g[0], upp=g[1]+1)
             grains[:, n] = gaux.rvs(population)
         for i in range(population):
             yield grains[i], prop[i]
+
+    def gen_population_iter(self, base):
+        r"""Generate population for the iteration."""
+        prop_base = np.array(base.proportions)
+        population = int(self.population/self.nwalkers)
+        aux = np.argwhere(prop_base < 0.05)
+        if len(aux) > 0:
+            prop_base[aux] = 0.05
+        prop_base = prop_base * self.alpha_scale
+        # print(prop_base)
+        prop = np.random.dirichlet(prop_base, size=population)
+        grains = np.zeros((population, len(self.samples)))
+        for n, g in enumerate(self.grains):
+            gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/ 4, #2**(self.iter-1),
+                                        low=g[0], upp=g[1]+1)
+            grains[:, n] = gaux.rvs(population)
+        for i in range(population):
+            yield grains[i], prop[i]
+
 
     def mixturegrid(self, base=None):
         r"""Make mixture grid."""

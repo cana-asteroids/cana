@@ -79,6 +79,7 @@ class Shkuratov(object):
         rf = Rf + Ti * Te * (np.exp(-1 * tau)) + \
             (0.5 * Te * Ti * Ri * np.exp(-2 * tau)) / \
             (1 - Ri * np.exp(-1 * tau))
+        # print(rb,rf)
         return rb, rf
 
     def build_spec(self, coef=None, albedo_w=0.55, wavelengths=None):
