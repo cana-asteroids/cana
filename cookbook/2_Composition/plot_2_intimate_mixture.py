@@ -19,7 +19,7 @@ sdb = sdoc.SDOC(mode='r')
 # Here we will just show an example for a titan tholin and ice tholin
 ocs_label, ocs_data = sdb.get_constant_batch(['T_0', 'I_0'])
 
-ocs = read_constant_batch(ocs_data, label=ocs_label)
+ocs = read_constant_batch(ocs_data, labels=ocs_label)
 
 # Initializing the model
 mixture = IntimateMixture(samples=ocs,
