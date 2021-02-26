@@ -43,7 +43,7 @@ INSTALL_REQUIRES = [
     'matplotlib',
     'dataclasses',
     'numba',
-    'dask'
+    'dask[complete]'
 ]
 
 PYTHON_REQUIRES = ">=3.6"
