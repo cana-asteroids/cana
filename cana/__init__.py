@@ -10,3 +10,5 @@ from .convolution import convolution, interp_spec
 from . import datasets
 from .composition import OpticalConstant, read_constant, Shkuratov, \
                          IntimateMixture, RandomSearch, read_constant_batch
+
+from .thermal import NEATM
