@@ -24,8 +24,8 @@ PACKAGES = ['cana',
             'cana.spectools',
             'cana.pipelines',
             'cana.datasets',
-            'cana.composition']
-#            'cana.pipelines']
+            'cana.composition',
+            'cana.thermal']
 
 PACKAGE_DATA = {
    'cana.datasets': ['data/taxonomy/*',
@@ -42,7 +42,8 @@ INSTALL_REQUIRES = [
     'sklearn',
     'matplotlib',
     'dataclasses',
-    'numba'
+    'numba',
+    'dask'
 ]
 
 PYTHON_REQUIRES = ">=3.6"

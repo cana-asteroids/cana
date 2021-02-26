@@ -5,7 +5,7 @@ import numpy as np
 from .core import BaseCompositionalModel, ModelOutput
 from ..util import verboseprint, get_truncated_normal
 from .. import interp_spec
-# import time
+from dask import delayed, compute
 
 class RandomSearch(BaseCompositionalModel):
     r"""Grid Model for compositional analysis."""
@@ -79,35 +79,12 @@ class RandomSearch(BaseCompositionalModel):
         prop = np.random.dirichlet(np.ones(len(self.samples)) /
                                    len(self.samples),
                                    size=self.initpopulation)
-        if self.grains.shape == (2,):
-            grains = np.random.randint(self.grains[0], self.grains[1]+1,
-                                       size=(self.initpopulation,
-                                       len(self.samples)))
-        else:
-            grains = np.zeros((self.initpopulation, len(self.samples)))
-            for n, g in enumerate(self.grains):
-                grains[:, n] = np.random.randint(g[0], g[1]+1,
-                                                 size=self.initpopulation)
+        grains = np.zeros((self.initpopulation, len(self.samples)))
+        for n, g in enumerate(self.grains):
+            grains[:, n] = np.random.randint(g[0], g[1]+1,
+                                             size=self.initpopulation)
         # creating mixtures
         for i in range(self.initpopulation):
-            yield grains[i], prop[i]
-
-    def gen_population_iter2(self, base):
-        r"""Generate population for the iteration."""
-        prop_base = np.array(base.proportions)
-        population = int(self.population/self.nwalkers)
-        aux = np.argwhere(prop_base < 0.05)
-        if len(aux) > 0:
-            prop_base[aux] = 0.05
-        prop_base = prop_base * self.alpha_scale
-        # print(prop_base)
-        prop = np.random.dirichlet(prop_base, size=population)
-        grains = np.zeros((population, len(self.samples)))
-        for n, g in enumerate(self.grains):
-            gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/ 6, #2**(self.iter-1),
-                                        low=g[0], upp=g[1]+1)
-            grains[:, n] = gaux.rvs(population)
-        for i in range(population):
             yield grains[i], prop[i]
 
     def gen_population_iter(self, base):
@@ -122,6 +99,7 @@ class RandomSearch(BaseCompositionalModel):
         prop = np.random.dirichlet(prop_base, size=population)
         grains = np.zeros((population, len(self.samples)))
         for n, g in enumerate(self.grains):
+
             gaux = get_truncated_normal(base.grainsizes[n], np.std([g[0], g[1]])/ 4, #2**(self.iter-1),
                                         low=g[0], upp=g[1]+1)
             grains[:, n] = gaux.rvs(population)
@@ -155,6 +133,30 @@ class RandomSearch(BaseCompositionalModel):
                                  grainsizes=grains, porosity=self.porosity,
                                  model=self.refmodel)
             yield m_aux
+
+    def model_aux(self, mix, spec, iter, albedo_lim=None, albedo_w=0.55,
+              normalize_spec=True, wnorm=1.2, normvalue=0.127,
+              wavelengths=None, datatype=None, **kwargs):
+        r"""
+        """
+        if albedo_lim is not None:
+            mspec, malbedo = mix.make(albedo_w=albedo_w,
+                                      wavelengths=None)
+            mspec = interp_spec(mspec, wavelengths, datatype)
+        # normalizing
+        if normalize_spec:
+            mspec = mspec.normalize(wnorm)
+            # if normvalue is not None:
+            #     mspec.r = mspec.r*normvalue
+        # evaluate mixture
+        score, p_value = self.eval(spec, mspec, **kwargs)
+        out = list(np.round(mix.proportions, 4))
+        out.extend(mix.grainsizes)
+        out.append(self.porosity)
+        if albedo_lim is not None:
+            out.append(malbedo)
+        out.extend([score, p_value, iter])
+        return out
 
     def model(self, spec, albedo_lim=None, albedo_w=0.55,
               normalize_spec=True, wnorm=1.2, normvalue=0.127, wavelengths=None,
@@ -201,37 +203,28 @@ class RandomSearch(BaseCompositionalModel):
             else:
                 mixtures = self.mixturegrid(result)
             # running model
+            res_aux = []
             for _, mix in enumerate(mixtures):
-                if albedo_lim is not None:
-                    mspec, malbedo = mix.make(albedo_w=albedo_w,
-                                              wavelengths=None)
-                    mspec = interp_spec(mspec, wavelengths, datatype)
-                # normalizing
-                if normalize_spec:
-                    mspec = mspec.normalize(wnorm)
-                    # if normvalue is not None:
-                    #     mspec.r = mspec.r*normvalue
-                # evaluate mixture
-                score, p_value = self.eval(spec, mspec, **kwargs)
-                # making output
-                out = list(np.round(mix.proportions, 4))
-                out.extend(mix.grainsizes)
-                out.append(self.porosity)
-                if albedo_lim is not None:
-                    out.append(malbedo)
-                out.extend([score, p_value, i])
-                result.append_mix(out, index=None)
-            # preparing for next iteration
+                res_aux2 = delayed(self.model_aux)(mix, spec, i,
+                                                   albedo_lim, albedo_w,
+                                                   normalize_spec, wnorm,
+                                                   normvalue,
+                                                   wavelengths, datatype, **kwargs)
+                res_aux.append(res_aux2)
+            res_aux = compute(*res_aux)
+            result.append_mix_batch(res_aux)
+            #     result.append_mix(out, index=None)
+            # # preparing for next iteration
             result.sort_mixes()
             if filterfunc is not None:
                 result = filterfunc(result, spec)
             self.iter = i
-            # timeend =  time.time()
+            # # timeend =  time.time()
             # print("--- %s seconds ---" % (timeend - timeinit))
             # print("--- %s seconds ---" % (timeend - time1))
         result = result.set_bestfit()
         result.select_valid(sigma)
-        result.build_result()
+        # result.build_result()
 
         if self.verbose >= 1:
             verboseprint("""\

@@ -215,7 +215,7 @@ class Spectrum(SpectralData):
             fspec_y = np.polyval(fcoefs, self.w)
         y_err = np.abs(fspec_y - self.r)
         # building new array
-        fspec = Spectrum(w=self.w, r=fspec_y, r_unc=y_err, unit=self.unit,
+        fspec = self.__class__(w=self.w, r=fspec_y, r_unc=y_err, unit=self.unit,
                          label=self.label + '_fit')
         return fspec, fcoefs
 
@@ -329,8 +329,8 @@ class Spectrum(SpectralData):
                            for val in cspec]
         aux = self[cspec_index]
 
-        spec = Spectrum(aux.w, aux.r, unit=self.unit,
-                        label=self.label + '_cleaned')
+        spec = self.__class__(aux.w, aux.r, unit=self.unit,
+                              label=self.label + '_cleaned')
         return spec
 
     def _sigma_clip(self, val, sigma, cspec):
@@ -414,8 +414,8 @@ class Spectrum(SpectralData):
             std = np.array(std)
         else:
             std = None
-        return Spectrum(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
-                        label=self.label + '_binned')
+        return self.__class__(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
+                              label=self.label + '_binned')
 
     def normalize(self, wnorm=0.55, window=None, interpolate=True):
         r"""
@@ -485,8 +485,7 @@ class Spectrum(SpectralData):
                                                    wmax=rr[1])
         return masked_spec
 
-    @staticmethod
-    def mask_region_aux(spec, wmin, wmax):
+    def mask_region_aux(self, spec, wmin, wmax):
         r"""
         Exclude a region of the spectrum.
 
@@ -511,8 +510,8 @@ class Spectrum(SpectralData):
         r_unc = spec.r_unc
         if r_unc is not None:
             r_unc = spec.r_unc[mask]
-        return Spectrum(w=w, r=r, r_unc=r_unc, unit=spec.unit,
-                        label=spec.label)
+        return self.__class__(w=w, r=r, r_unc=r_unc, unit=spec.unit,
+                              label=spec.label)
 
 
     def plot(self, fax=None, show=False, savefig=None,
@@ -564,7 +563,7 @@ class Spectrum(SpectralData):
         # Checking if desired to plot the axis labels
         if axistitles:
             fax.set_xlabel('Wavelength (%s)' % self.unit)
-            fax.set_ylabel('Normalized Reflectance')
+            fax.set_ylabel('Reflectance')
         # plot legend?
         if 'label' in speckwargs:
             fax.legend(**legendkwargs)

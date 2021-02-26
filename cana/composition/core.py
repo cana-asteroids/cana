@@ -53,7 +53,8 @@ class BaseCompositionalModel(object):
         self.samples_ids = [sam.label for sam in samples]
         self.grains = grainsizes
         self.grains = np.asarray(self.grains)
-
+        if self.grains.shape == (2,):
+            self.grains = np.repeat([self.grains], len(self.samples), axis=0)
         self.proportions = proportions
         self.proportions = np.asarray(self.proportions)
 
@@ -295,6 +296,19 @@ class ModelOutput(object):
         else:
             aux = len(self.allmixes)
             self.allmixes.loc[aux] = val
+        return self.allmixes
+
+    def append_mix_batch(self, values):
+        r"""Append the mixture evaluation result to the table.
+
+        Parameters
+        ----------
+        val: list of lists
+            List of mixture parameter.
+        """
+        aux = pd.DataFrame(values, columns=self.allmixes.columns)
+        self.allmixes = self.allmixes.append(aux)
+        self.allmixes = self.allmixes.reset_index(drop=True)
         return self.allmixes
 
     def plot_bestfit_residual(self, fax=None, show=False, savefig=None,

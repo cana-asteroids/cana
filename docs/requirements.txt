@@ -10,3 +10,4 @@ numba
 dataclasses
 h5py
 cana-sdoc
+dask
