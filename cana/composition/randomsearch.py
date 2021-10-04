@@ -91,12 +91,19 @@ class RandomSearch(BaseCompositionalModel):
         r"""Generate population for the iteration."""
         prop_base = np.array(base.proportions)
         population = int(self.population/self.nwalkers)
-        aux = np.argwhere(prop_base < 0.05)
-        if len(aux) > 0:
-            prop_base[aux] = 0.05
-        prop_base = prop_base * self.alpha_scale
+        prop = []
+        # for p in prop_base:
+        props = np.sqrt(prop_base) #/np.sum(theta[:len(constants)])
+        for _ in range(population):
+            b = [np.random.normal(i, self.alpha_scale) for i in props]
+            b = np.array(b)**2
+            prop.append(b / np.sum(b))
+         # aux = np.argwhere(prop_base < 0.01)
+        # if len(aux) > 0:
+        #     prop_base[aux] = 0.01
+        # prop_base = prop_base * self.alpha_scale
         # print(prop_base)
-        prop = np.random.dirichlet(prop_base, size=population)
+        # prop = np.random.dirichlet(prop_base, size=population)
         grains = np.zeros((population, len(self.samples)))
         for n, g in enumerate(self.grains):
 
@@ -114,10 +121,12 @@ class RandomSearch(BaseCompositionalModel):
             grid = self.gen_initial_population()
         else:
             # running iterations and walkers
-            aux = base.allmixes.copy()
-            aux2 = aux[self.samples_ids]
-            aux2 = aux2.drop_duplicates()
-            aux2 = aux2.iloc[:self.nwalkers]
+            # aux = base.allmixes.copy()
+            # aux2 = aux[self.samples_ids + ['score']]
+            # aux2 = aux2.drop_duplicates()
+            # aux2 = aux2.nsmallest(self.nwalkers, 'score').compute()
+            aux2 = base.nbest(self.nwalkers)
+            # print(aux2['triton-II.dat'].compute())
             grid = []
             if self.verbose > 1:
                 verboseprint("Number of Walkers {0}".format(self.nwalkers))
@@ -160,7 +169,8 @@ class RandomSearch(BaseCompositionalModel):
 
     def model(self, spec, albedo_lim=None, albedo_w=0.55,
               normalize_spec=True, wnorm=1.2, normvalue=0.127, wavelengths=None,
-              sigma=1, datatype=None, filterfunc=None, **kwargs):
+              sigma=1, datatype=None, filterfunc=None, outtype='full',
+              **kwargs):
         r"""Find the best fit to the spectrum.
 
         Parameters
@@ -215,9 +225,9 @@ class RandomSearch(BaseCompositionalModel):
             result.append_mix_batch(res_aux)
             #     result.append_mix(out, index=None)
             # # preparing for next iteration
-            result.sort_mixes()
-            if filterfunc is not None:
-                result = filterfunc(result, spec)
+            # result.sort_mixes()
+            # if filterfunc is not None:
+            #     result = filterfunc(result, spec)
             self.iter = i
             # # timeend =  time.time()
             # print("--- %s seconds ---" % (timeend - timeinit))
@@ -225,7 +235,7 @@ class RandomSearch(BaseCompositionalModel):
         result = result.set_bestfit()
         result.select_valid(sigma)
         # result.build_result()
-
+        # result.sort_mixes()
         if self.verbose >= 1:
             verboseprint("""\
                          Best mixture with score {0}:

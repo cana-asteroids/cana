@@ -5,14 +5,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-
+import dask.dataframe as dd
 from .mixtures import IntimateMixture
+import multiprocessing
 
 
 class BaseCompositionalModel(object):
     r"""Compositional Model core class."""
 
-    def __init__(self, samples, grainsizes=[30, 50],
+    def __init__(self, samples, grainsizes=[5, 200],
                  proportions=[0, 1], porosity=0.5,
                  mixtype='intimate',
                  model='shkuratov', metric='chi2-error'):
@@ -88,7 +89,8 @@ class BaseCompositionalModel(object):
     def chi2_error(self, spec, mspec):
         r"""Calculate the Reduced chi-square.
 
-        In this case the spec have errorbars."""
+        In this case the spec have errorbars.
+        """
         res_aux = (spec.r - mspec.r)**2
         res = np.sum(res_aux/spec.r_unc**2) / (2*len(self.samples))
         # print(res_aux)
@@ -185,7 +187,12 @@ class ModelOutput(object):
         if albedo:
             columns.append('albedo')
         columns.extend(['score', 'p-value', 'iter'])
-        out = pd.DataFrame(columns=columns)
+        dtypes = [pd.Series([], dtype= 'float') for _ in columns[:-1]] + \
+                  [pd.Series([], dtype='int')]
+
+        out = pd.DataFrame(dict(zip(columns, dtypes)))
+        ncpus = multiprocessing.cpu_count()
+        out = dd.from_pandas(out, npartitions=ncpus)
         return out
 
     def build_result(self):
@@ -216,10 +223,10 @@ class ModelOutput(object):
 
     def set_bestfit(self, index=None):
         r"""Set which is the bestfit."""
-        self.sort_mixes()
+        # self.sort_mixes()
+
         if index is None:
-            best = self.allmixes.iloc[0]
-            index = best.name
+            index = self.nbest(1).compute().index[0]
         self.bestmix = self.mixfromindex(index=index)
         self.bestspec, self.bestalbedo = self.make_spec()
         self.bestscore = self.allmixes.loc[index, 'score']
@@ -227,9 +234,9 @@ class ModelOutput(object):
 
     def mixfromindex(self, index=0):
         r"""Make the mixture from the results table."""
-        aux = self.allmixes.loc[index]
-        props = list(aux[[sam for sam in self.model.samples_ids]])
-        grains = list(aux[[sam+'_grain' for sam in self.model.samples_ids]])
+        aux = self.allmixes.loc[index].compute()
+        props = list(aux[[sam for sam in self.model.samples_ids]].values[0])
+        grains = list(aux[[sam+'_grain' for sam in self.model.samples_ids]].values[0])
         samples = self.model.samples
         mix = self.model.mixtype(samples, proportions=props,
                                  grainsizes=grains,
@@ -247,7 +254,9 @@ class ModelOutput(object):
             Default is 'score'.
 
         """
-        self.allmixes = self.allmixes.sort_values(by=[col])
+        print('aaaa')
+        self.allmixes = pd.DataFrame(self.allmixes.compute())
+        self.allmixes = self.allmixes.sort_values(by='score')
         if self.albedo_lim is not None:
             aux = self.allmixes[(self.allmixes['albedo'] >= self.albedo_lim[0]) &
                                 (self.allmixes['albedo'] <= self.albedo_lim[1])]
@@ -256,6 +265,24 @@ class ModelOutput(object):
             aux2.extend(aux3)
             self.allmixes = self.allmixes.loc[aux2]
         return self.allmixes
+
+
+    def nbest(self, n):
+        r"""
+        """
+        if self.albedo_lim is not None:
+            aux = self.allmixes[(self.allmixes['albedo'] >= self.albedo_lim[0]) &
+                                (self.allmixes['albedo'] <= self.albedo_lim[1])]
+            excess = n - len(aux)
+            if excess < 0:
+                nbest = self.allmixes.nsmallest(n, 'score')
+            else:
+                n_aux = self.allmixes.nsmallest(excess, 'score')
+                nbest = aux.merge(n_aux, left_index=True, right_index=True)
+        else:
+            nbest = self.allmixes.nsmallest(n, 'score')
+        return nbest
+
 
     def select_valid(self, sigma=3):
         r"""Select valid models.

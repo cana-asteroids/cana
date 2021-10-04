@@ -216,7 +216,7 @@ class Spectrum(SpectralData):
         y_err = np.abs(fspec_y - self.r)
         # building new array
         fspec = self.__class__(w=self.w, r=fspec_y, r_unc=y_err, unit=self.unit,
-                         label=self.label + '_fit')
+                               label=self.label + '_fit')
         return fspec, fcoefs
 
     def autofit(self, degree_min=1, degree_max=12):
@@ -417,6 +417,33 @@ class Spectrum(SpectralData):
         return self.__class__(w=wave_reb, r=ref_reb, r_unc=std, unit=self.unit,
                               label=self.label + '_binned')
 
+    def ref_from_wavelength(self, w, interpolate=True):
+        r"""
+        Get the spectrum reflectance in a particular wavelength.
+
+        Parameters
+        ----------
+        w: float
+            Wavelength value
+            If interpolate=False, The code will search the closest
+            value.
+
+        interpolate: boolean (optional)
+            If interpolate=False, The code will search the closest
+            value. If True it will interpolate the value of w.
+
+        Returns
+        -------
+        The reflectance value
+
+        """
+        if not interpolate:
+            aux = find_nearest(self.w, w)[0]
+            ref = self.r[aux]
+        else:
+            ref = np.interp(w, self.w, self.r)
+        return ref
+
     def normalize(self, wnorm=0.55, window=None, interpolate=True):
         r"""
         Normalize the spectrum in a particular wavelength.
@@ -432,7 +459,7 @@ class Spectrum(SpectralData):
             The wavelenght window size for normalizing.
             If None it will normalize in the wnorm point only.
 
-        interpolate: boolean (optional) -> not implemented
+        interpolate: boolean (optional)
             If interpolate=False, The code will search the closest
             value. If True it will interpolate the value of wnorm.
 
@@ -442,11 +469,7 @@ class Spectrum(SpectralData):
 
         """
         if window is None:
-            if not interpolate:
-                aux = find_nearest(self.w, wnorm)[0]
-                norm_factor = self.r[aux]
-            else:
-                norm_factor = np.interp(wnorm, self.w, self.r)
+            norm_factor = self.ref_from_wavelength(wnorm, interpolate=interpolate)
             self.r = self.r / norm_factor
             if self.r_unc is not None:
                 self.r_unc = self.r_unc / norm_factor
@@ -562,7 +585,9 @@ class Spectrum(SpectralData):
         fax.errorbar(self.w, self.r, yerr=self.r_unc, **speckwargs)
         # Checking if desired to plot the axis labels
         if axistitles:
-            fax.set_xlabel('Wavelength (%s)' % self.unit)
+            if self.unit == 'micron':
+                unit_label = '$\mu$m'
+            fax.set_xlabel('Wavelength (%s)' % unit_label)
             fax.set_ylabel('Reflectance')
         # plot legend?
         if 'label' in speckwargs:
