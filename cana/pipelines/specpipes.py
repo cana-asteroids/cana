@@ -52,7 +52,7 @@ def primitive_visible(spec, params='default', error=SpecError(),
         tax = Taxonomy()
         params = [slope, depth, tax]
     # Stablishing default values for the analysis
-    speckwars_default = {'unit': 'microns'}
+    speckwars_default = {'unit': 'micron'}
     speckwargs = kwargupdate(speckwars_default, speckwargs)
     isband_default = {'min_depth': 1., 'theoric_min': 0.7, 'max_dist': 0.05,
                       'sigma': 3}

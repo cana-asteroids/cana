@@ -329,7 +329,7 @@ class Spectrum(SpectralData):
                            for val in cspec]
         aux = self[cspec_index]
 
-        spec = self.__class__(aux.w, aux.r, unit=self.unit,
+        spec = self.__class__(aux.w, aux.r, r_unc=aux.r_unc, unit=self.unit,
                               label=self.label + '_cleaned')
         return spec
 
@@ -469,14 +469,15 @@ class Spectrum(SpectralData):
 
         """
         if window is None:
-            norm_factor = self.ref_from_wavelength(wnorm, interpolate=interpolate)
-            self.r = self.r / norm_factor
-            if self.r_unc is not None:
-                self.r_unc = self.r_unc / norm_factor
+            norm_factor = self.ref_from_wavelength(wnorm,
+                                                   interpolate=interpolate)
         else:
             aux = np.argwhere((self.w > wnorm-window) &
                               (self.w < wnorm+window))
-            self.r = self.r / np.mean(self.r[aux])
+            norm_factor = np.mean(self.r[aux])
+        self.r = self.r / norm_factor
+        if self.r_unc is not None:
+            self.r_unc = self.r_unc / norm_factor
         return self
 
     def mask_region(self, region=[(1.3, 1.45), (1.8, 1.95)]):
@@ -574,7 +575,7 @@ class Spectrum(SpectralData):
         # checking if plot in another frame
         if fax is None:
             fig = plt.figure()
-            fax = fig.gca()
+            fax = plt.gca()
         # setting default values for image plot with matplotlib
         specsty_defaults = {'c': '0.1', 'lw': 1}
         legendsty_defaults = {'loc': 'best'}

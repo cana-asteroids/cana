@@ -78,9 +78,12 @@ class SpectralData:
         r"""Return the length of the Spectral Data."""
         return len(self.w)
 
-    def copy(self):
+    def copy(self, deep=True):
         r"""Return a copy of the object."""
-        return copy.copy(self)
+        if deep:
+            return copy.deepcopy(self)
+        else:
+            return copy.copy(self)
 
     def sort(self, order='w'):
         r"""Sort the Spectral data.

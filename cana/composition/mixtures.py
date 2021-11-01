@@ -6,6 +6,21 @@ import numpy as np
 from .shkuratov import Shkuratov
 from .. import interp_spec
 
+
+def create_inclusion(constant1, constant2, concentration):
+    r"""
+    """
+    #interpolating second constant
+    constant2_ = constant2.rebase(constant1.w)
+    ime = (constant1.k * constant2_.n) - (constant1.n * constant2_.k) / \
+          (constant2_.n**2 + constant2_.k**2)
+    # ime =
+    ka = 1.5 * concentration * constant1.n * ime
+    constant1_ = constant1.copy()
+    constant1_.k += ka
+    return constant1_
+
+
 class IntimateMixture(object):
     r"""Mixture of samples."""
 

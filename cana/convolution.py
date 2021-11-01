@@ -64,7 +64,10 @@ def convolution(spec, system='sdss', filters=None, label=None, speckwargs=None):
     -------
     PhotoDataframe with colvoluted spectrophotometry
     """
-    photo = Photometry(system)
+    if isinstance(system, str):
+        photo = Photometry(system)
+    else:
+        photo = system
     speckwars_default = {'unit': 'micron'}
     speckwargs = kwargupdate(speckwars_default, speckwargs)
     if not isinstance(spec, list):
@@ -79,6 +82,8 @@ def convolution(spec, system='sdss', filters=None, label=None, speckwargs=None):
             ps_aux = photo.convol(spc, filters)
             pspec = pspec.append(ps_aux)
     return pspec
+
+
 
 def plot_convolution(spec, photo, fax=None, savefig=None, axistitles=True,
                      show=True, speckwargs=None, dotkwargs=None):

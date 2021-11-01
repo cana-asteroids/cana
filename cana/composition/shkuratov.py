@@ -4,6 +4,7 @@ import numpy as np
 from .. import Spectrum
 from numba import jit
 
+
 class Shkuratov(object):
     r"""Shkuratov Reflectance Model.
 
@@ -39,33 +40,33 @@ class Shkuratov(object):
 
     def optical_density(self):
         r"""Calculate Optical Density."""
-        tau = ((4 * np.pi * self.sample.k * self.grain) /
-               self.sample.w)
+        tau = (4 * np.pi * self.sample.k * self.grain) / self.sample.w
         return tau
 
     def fresnel_coef(self):
         r"""Calculate Fresnel coeficient."""
-        r0 = (self.sample.n - 1)**2 / (self.sample.n + 1)**2
-        return r0
+        r_0 = (self.sample.n - 1) ** 2 / (self.sample.n + 1) ** 2
+        return r_0
 
     def scattering_coef(self):
         r"""Scatering coeficients based on Shkuratov (1999) approximations."""
         # calculating internal_particle_reflection
-        rb, rf = self.scattering_coef_aux(self.sample.n, self.sample.k,
-                                          self.grain, self.sample.w)
+        r_b, r_f = self.scattering_coef_aux(
+            self.sample.n, self.sample.k, self.grain, self.sample.w
+        )
         # creating output
-        scat = np.zeros(len(rb), dtype=[('b', np.float64), ('f', np.float64)])
-        scat['b'] = rb
-        scat['f'] = rf
+        scat = np.zeros(len(r_b), dtype=[("b", np.float64), ("f", np.float64)])
+        scat["b"] = r_b
+        scat["f"] = r_f
         return scat
 
     @staticmethod
     @jit(nopython=True)
     def scattering_coef_aux(n, k, grain, w):
         r"""Calculate the Scatering coeficient."""
-        tau = ((4 * np.pi * k * grain) / w)
-        r0 = (n - 1)**2 / (n + 1)**2
-        Ri = 1.04 - (1 / n**2)
+        tau = (4 * np.pi * k * grain) / w
+        r0 = (n - 1) ** 2 / (n + 1) ** 2
+        Ri = 1.04 - (1 / n ** 2)
         # Using approximations for reflection
         Re = r0 + 0.05
         Rb = (0.28 * n - 0.2) * Re
@@ -74,11 +75,12 @@ class Shkuratov(object):
         Te = 1 - Re
         Ti = 1 - Ri
         # average light scattering indicatrix of a particle
-        rb = Rb + 0.5 * Te * Ti * Ri * np.exp(-2 * tau) / \
-            (1 - Ri * np.exp(-1 * tau))
-        rf = Rf + Ti * Te * (np.exp(-1 * tau)) + \
-            (0.5 * Te * Ti * Ri * np.exp(-2 * tau)) / \
-            (1 - Ri * np.exp(-1 * tau))
+        rb = Rb + 0.5 * Te * Ti * Ri * np.exp(-2 * tau) / (1 - Ri * np.exp(-1 * tau))
+        rf = (
+            Rf
+            + Ti * Te * (np.exp(-1 * tau))
+            + (0.5 * Te * Ti * Ri * np.exp(-2 * tau)) / (1 - Ri * np.exp(-1 * tau))
+        )
         # print(rb,rf)
         return rb, rf
 
@@ -94,14 +96,13 @@ class Shkuratov(object):
         if coef is None:
             coef = self.scattering_coef()
         # albedo indicatrix
-        rho_b = self.porosity * coef['b']
-        rho_f = (self.porosity * coef['f']) + 1 - self.porosity
+        rho_b = self.porosity * coef["b"]
+        rho_f = (self.porosity * coef["f"]) + 1 - self.porosity
         # building albedo
-        aux = (1 + rho_b**2 - rho_f**2) / (2 * rho_b)
-        albedo = aux - np.sqrt(aux**2 - 1)
+        aux = (1 + rho_b ** 2 - rho_f ** 2) / (2 * rho_b)
+        albedo = aux - np.sqrt(aux ** 2 - 1)
         # building Spectrum
-        spec = Spectrum(self.sample.w, albedo, label='modeled_spec',
-                        unit='micron')
+        spec = Spectrum(self.sample.w, albedo, label="modeled_spec", unit="micron")
         # return albedo
         if albedo_w is not None:
             geom_alb = np.interp(albedo_w, self.sample.w, albedo)

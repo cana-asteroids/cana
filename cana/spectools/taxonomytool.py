@@ -274,9 +274,16 @@ class Taxonomy(object):
             tax2comp = self.dataset
         # Checking if it is an auxiliary plot
         if isinstance(tclass, str) or isinstance(tclass, np.bytes_):
-            fax.plot(tax2comp['wavelength'],
-                     tax2comp[tclass],
-                     label=tclass, **taxkwargs)
+            if region is not None:
+                aux = np.where((tax2comp['wavelength']>=region[0]) &
+                               (tax2comp['wavelength']<=region[1]))
+                fax.plot(tax2comp['wavelength'][aux],
+                         tax2comp[tclass][aux],
+                         label=tclass, **taxkwargs)
+            else:
+                fax.plot(tax2comp['wavelength'],
+                         tax2comp[tclass],
+                         label=tclass, **taxkwargs)
         else:
             for t in tclass:
                 if region is not None:

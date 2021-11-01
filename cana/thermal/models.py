@@ -142,7 +142,7 @@ class NEATM(ThermalCore):
         ThermalSpec
             The thermal spectrum array
         """
-        flux = self._integral_aux(wavelengths)
+        flux = self._integral(wavelengths)
         # fixing units
         norm = (self.epsilon * (self.D / self.delta)**2
                 / np.pi / 2.0) * 4.468370499519714 * 1e9
