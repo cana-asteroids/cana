@@ -47,7 +47,7 @@ INSTALL_REQUIRES = [
     # 'http://github.com/PolyChord/PolyChordLite@master'
 ]
 
-DEPENDENCY_LINKS = ['git+https://github.com/PolyChord/PolyChordLite@master']
+# DEPENDENCY_LINKS = ['git+https://github.com/PolyChord/PolyChordLite@master']
 
 PYTHON_REQUIRES = ">=3.6"
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
           #   platforms=PLATFORMS,
           #   scripts=SCRIPTS,
           packages=PACKAGES,
-           dependency_links = DEPENDENCY_LINKS,
+           # dependency_links = DEPENDENCY_LINKS,
           #   ext_modules=EXT_MODULES,
           package_data=PACKAGE_DATA,
           #   classifiers=CLASSIFIERS,
