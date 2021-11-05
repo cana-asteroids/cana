@@ -107,7 +107,7 @@ class Photometry(PhotometryBase):
     def __init__(self, system='sdss', tcurve=True):
         self.name = system.lower()
         super(Photometry, self).__init__(system=system)
-        if system == 'dawn':
+        if (system == 'dawn') or (system == 'standard'):
             tcurve = False
         self.convol_type = tcurve
         if self.convol_type:

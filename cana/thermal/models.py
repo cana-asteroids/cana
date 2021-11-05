@@ -130,8 +130,8 @@ class NEATM(ThermalCore):
         T0 = self.subsolar_temperature(self.r, albedo)
         T = T0 * np.cos(phi)**0.25 * np.cos(theta)**0.25
         B = planckian(wavelength, T)
-        a = B * np.pi * np.cos(phi)**2 * np.cos(theta - self.alpha)
-        return a
+        f = B * np.pi * np.cos(phi)**2 * np.cos(theta - self.alpha)
+        return f
 
     def flux(self, albedo, diameter, wavelengths=[0.5, 2.5, 4.5]):
         r"""Calculate the thermal flux.
@@ -160,5 +160,5 @@ class NEATM(ThermalCore):
         return Spectrum(wavelengths, flux, label='thermal-flux')
 
 
-class ThermalSpec(Spectrum, ThermalCore):
+class ThermalSpec(Spectrum):
     r""" Thermal Spectrum."""
