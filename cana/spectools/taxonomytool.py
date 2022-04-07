@@ -68,7 +68,7 @@ def _load_bus(fpath=PWD+'/../datasets/data/taxonomy/bus_demeo.tab'):
 
 
 def taxonomy(spec, system='demeo', method='chisquared', return_n=3, norm=0.55,
-             fitspec=True, speckwargs=None):
+             fitspec=False, speckwargs=None):
     r"""
     Perform taxonomic classification.
 
@@ -223,8 +223,9 @@ class Taxonomy(object):
 
         """
         # normalizing both specs on the secound point
-        spec1 = spec1/spec1[1]
-        spec2 = spec2/spec2[1]
+        # spec1 = spec1/spec1[1]
+        # spec2 = spec2/spec2[1]
+        spec2 = np.sum(spec1 * spec2)/np.sum(spec2**2)
         # calculating the chi-quared
         n_points = len(spec1)
         chi_aux = np.square(spec1-spec2)/spec1
@@ -253,6 +254,8 @@ class Taxonomy(object):
             spec_reflectances = np.polyval(fcoef, tax_comparable['wavelength'])
             spec_reflectances = spec_reflectances / spec_reflectances[norm_id]
         # If fispec is False, then will interpolate the values directly from
+        else:
+            spec_reflectances = np.interp(tax_comparable['wavelength'], spec.w, spec.r)
         # the spectrum ---> needs implementation
 
         return spec_reflectances, tax_comparable
