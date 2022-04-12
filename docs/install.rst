@@ -20,21 +20,14 @@ If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https:
       pip install cana-asteroids
 
 
-Manual download and install
----------------------------
+Installing the lastest version
+------------------------------
 
-You can get the latest stable version
-`here <https://github.com/depra/cana/releases>`_, or clone the repository using git:
+You can get the current development version with:
 
 ::
 
-      git clone https://github.com/depra/cana.git
-
-Unpack it if necessary, and go into the directory "*cana-master*", then run the below commands on a terminal shell:
-
-:: 
-
-   python setup.py install
+      pip install git+https://github.com/cana-asteroids/cana.git
 
 
 Dependencies

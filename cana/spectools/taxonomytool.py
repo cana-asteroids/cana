@@ -225,10 +225,10 @@ class Taxonomy(object):
         # normalizing both specs on the secound point
         # spec1 = spec1/spec1[1]
         # spec2 = spec2/spec2[1]
-        spec2 = np.sum(spec1 * spec2)/np.sum(spec2**2)
+        beta = np.sum(spec1 * spec2) / np.sum(spec2**2)
         # calculating the chi-quared
         n_points = len(spec1)
-        chi_aux = np.square(spec1-spec2)/spec1
+        chi_aux = np.square(spec1 - (spec2 * beta) / spec1)
         chi = np.sum(chi_aux)/n_points
         return chi
 
