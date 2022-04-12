@@ -6,7 +6,7 @@ from setuptools import setup
 # ##################
 NAME = 'cana-asteroids'
 FULLNAME = "CANA"
-VERSION = '0.11'
+VERSION = '0.2.1'
 DESCRIPTION = 'Codes for ANalysis of Asteroids'
 with open("README.rst") as f:
     LONG_DESCRIPTION = ''.join(f.readlines())
